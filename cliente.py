@@ -3,7 +3,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 import json
 import pickle
 
-HOST = '10.0.149.110'
+HOST = '127.0.0.1'
 PORT = 5000
 
 servidor = (HOST, PORT)
