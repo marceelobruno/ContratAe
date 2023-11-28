@@ -2,7 +2,7 @@ import socket
 import pickle
 import random
 
-HOST = '127.0.0.1'
+HOST = '10.0.149.110'
 PORT = 5000
 
 servidor = (HOST, PORT)
