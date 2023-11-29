@@ -1,4 +1,5 @@
 from users import Candidato
+from DataStructures.ListaSequencialNumPY import Lista
 
 class Vaga:
     def __init__(self, nome, area, descricao, limite, nome_empresa, salario, requisitos):
@@ -9,17 +10,25 @@ class Vaga:
         self.__nome_empresa = nome_empresa
         self.__salario = salario
         self.__requisitos = requisitos
-        self.__lista_candidaturas = [] #lista do professor vulgo Alex
+        self.__lista_candidaturas = Lista() #lista do professor vulgo Alex
         
-    @property
-    def candidatura(self):
+    def adicionarCandidatura(self,candidato:Candidato):
+        self.__lista_candidaturas.append(candidato.nome)
+
+    def mostrarCandidaturas(self):
         return self.__lista_candidaturas
-    
-    @candidatura.setter
-    def candidatura(Self, candidato: Candidato):
-        pass
     
     def __str__(self) -> str:
         pass
     
-    
+if __name__ == '__main__':
+    v = Vaga('tsi','ti','adf','fsr','hsdfiuwshgf','fhwiufhw', 'hhdsgf')
+    c = Candidato('luiz','lf','1234')
+    d = Candidato('lucas','lf','1234')
+    e = Candidato('marcelo','lf','1234')
+    f = Candidato('bruno','lf','1234')
+    v.adicionarCandidatura(c)
+    v.adicionarCandidatura(d)
+    v.adicionarCandidatura(e)
+    v.adicionarCandidatura(f)
+    print(v.mostrarCandidaturas())

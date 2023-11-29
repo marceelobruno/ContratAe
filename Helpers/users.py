@@ -1,4 +1,6 @@
 import random
+import time
+# from vaga import Vaga
 
 class Recrutador:
     def __init__(self, nome, nome_empresa, senha, nome_usuario):
@@ -27,23 +29,28 @@ class Candidato:
         self.__id = None
         self.__vagas_aplicadas = []
     
+    @property
+    def nome(self):
+        return self.__nome
+
     def ver_vagas(self):
         pass
-    
-    def candidatar(self):
-        pass
+    # def candidatar(self, vaga: Vaga):
+    #     pass
     
     def ver_candidaturas(self):
-        pass
+        return self.__vagas_aplicadas
+        
     
     def cancelar_candidatura(self):
         pass
     
-    def editar_perfil(self):
+    def criar_perfil(self, skills:list, area, descricao, cidade, uf):
         pass
     
-    def __gerar_ID(self):
-        pass
+    # def __gerar_ID(self):
+    #     self.__id = int(time.time())
+
     
     def __str__(self) -> str:
         return f"Nome:{self.__nome} email: {self.__email}"

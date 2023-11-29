@@ -2,8 +2,9 @@ import pickle
 import socket
 import threading
 
-from ChainingHashTable import ChainingHashTable
-from users import Candidato
+from Helpers.DataStructures.ChainingHashTable import ChainingHashTable
+from Helpers.DataStructures.ListaSequencialNumPY import Lista
+from users import Candidato, Recrutador
 
 HOST = '127.0.0.1'
 PORT = 5000
@@ -15,6 +16,7 @@ server.bind((HOST, PORT))
 server.listen()
 clientes = {}
 TableCandidatos = ChainingHashTable()  # -> hash table
+ListaRecrutadores = Lista()
 
 
 def handle_client(client_socket):
@@ -63,6 +65,7 @@ def protocol(msg, cliente):
             print(TableCandidatos)
 
         elif data_cliente["type"] == "recrutador":
+            
             pass
 
 
