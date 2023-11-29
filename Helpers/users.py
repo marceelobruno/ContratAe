@@ -46,4 +46,4 @@ class Candidato:
         pass
     
     def __str__(self) -> str:
-        pass
+        return f"Nome:{self.__nome} email: {self.__email}"
