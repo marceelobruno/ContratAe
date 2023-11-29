@@ -2,8 +2,8 @@ import pickle
 import socket
 import threading
 
-from Helpers.DataStructures.ChainingHashTable import ChainingHashTable
-from Helpers.DataStructures.ListaSequencialNumPY import Lista
+from DataStructures.ChainingHashTable import ChainingHashTable
+from DataStructures.ListaSequencialNumPY import Lista
 from users import Candidato, Recrutador
 
 HOST = '127.0.0.1'
@@ -65,8 +65,10 @@ def protocol(msg, cliente):
             print(TableCandidatos)
 
         elif data_cliente["type"] == "recrutador":
-            
-            pass
+            r = Recrutador(data_cliente["nome"],data_cliente["nomeEmpresa"], data_cliente["senha"], data_cliente["usuario"])
+            ListaRecrutadores.append(r.usuario)
+
+            print(ListaRecrutadores)
 
 
 def runServer():

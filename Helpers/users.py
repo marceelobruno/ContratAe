@@ -8,7 +8,14 @@ class Recrutador:
         self.__nome_empresa = nome_empresa
         self.__senha = senha
         self.__usuario = nome_usuario
-        
+    
+    @property
+    def nome(self):
+        return self.__nome
+    @property
+    def usuario(self):
+        return self.__usuario
+    
     def criar_vaga(self):
         pass
     
