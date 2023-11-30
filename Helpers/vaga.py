@@ -28,8 +28,6 @@ class Vaga:
     Salario: {self.__salario}
     Limite de Vagas: {self.__limite}
     Descrição: {self.__descricao}
-    
-
 """
     
 # if __name__ == '__main__':
