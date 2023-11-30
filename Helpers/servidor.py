@@ -34,13 +34,26 @@ def candidato():
 
 
 def protocol(msg, cliente):
-    # GET -> Pegar informaÃ§Ãµes informaÃ§Ãµes de candidaturas, informaÃ§Ãµes de vagas e lista de candidatos(caso Recrutador).
-    # POST -> Postar infomaÃ§Ãµes como vaga, novo usuario ou recrutador.
-    # DELETE -> Deletar usuÃ¡rios(Recrutador e Candidato) e Vagas, ou cancelar candidatura caso usuÃ¡rio.
-    # EDIT -> Editar informaÃ§Ãµes referente ao perfil do usuÃ¡rio.
-    # APPLY -> Referente ao usuario candidatar em uma vaga.
-
-    if msg == 'POST':
+    """
+        GET -> Pegar informações de candidaturas, informações de vagas e lista de candidatos (caso Recrutador).
+        POST -> Postar informações como vaga, novo usuário ou recrutador.
+        DELETE -> Deletar usuários (Recrutador e Candidato) e vagas, ou cancelar candidatura caso usuário.
+        EDIT -> Editar informações referentes ao perfil do usuário.
+        APPLY -> Referente ao usuário candidatar-se a uma vaga.
+    """
+    if msg == 'GET':
+        
+        data_cliente = cliente.recv(1024)
+        data_cliente = pickle.loads(data_cliente)
+        
+        if data_cliente["type"] == "c":
+            pass
+        
+        elif data_cliente["type"] == "r":
+            pass
+        
+        
+    elif msg == 'POST':
 
         # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
         data_cliente = cliente.recv(1024)
@@ -49,7 +62,7 @@ def protocol(msg, cliente):
 
         # print(data_cliente)
 
-        if data_cliente["type"] == "candidato":
+        if data_cliente["type"] == "c":
 
             # candidato = Candidato(data_cliente["nome"], data_cliente["email"], data_cliente["senha"]) #-> intanciando um candidato usando as chaves do dicionario enviado pelo cliente.
             # -> adicionando no dicionario o candidato e a chave Ã© o campo id.
@@ -66,7 +79,7 @@ def protocol(msg, cliente):
 
             print(TableCandidatos)
 
-        elif data_cliente["type"] == "recrutador":
+        elif data_cliente["type"] == "r":
             r = Recrutador(data_cliente["nome"],data_cliente["nomeEmpresa"], data_cliente["senha"], data_cliente["usuario"])
             ListaRecrutadores.append(r)
             print(ListaRecrutadores)
