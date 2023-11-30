@@ -19,7 +19,7 @@ class Lista:
         """ Construtor padrão da classe Pilha sem argumentos. Ao instanciar
             um objeto do tipo Pilha, esta iniciará vazia. 
         """
-        self.__array = np.full(size,None,dtype=object)
+        self.__array = np.full(size,any,dtype=object)
         self.__posAtual = -1
         
     def estaVazia(self)->bool:

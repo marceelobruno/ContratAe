@@ -5,6 +5,7 @@ import threading
 from DataStructures.ChainingHashTable import ChainingHashTable
 from DataStructures.ListaSequencialNumPY import Lista
 from users import Candidato, Recrutador
+# from vaga import Vaga
 
 HOST = '127.0.0.1'
 PORT = 5000
@@ -17,6 +18,7 @@ server.listen()
 clientes = {}
 TableCandidatos = ChainingHashTable()  # -> hash table
 ListaRecrutadores = Lista()
+ListaVagas = []
 
 
 def handle_client(client_socket):
@@ -45,7 +47,7 @@ def protocol(msg, cliente):
         # -> usando o pickle para decodificar o dicionario
         data_cliente = pickle.loads(data_cliente)
 
-        print(data_cliente)
+        # print(data_cliente)
 
         if data_cliente["type"] == "candidato":
 
@@ -66,9 +68,14 @@ def protocol(msg, cliente):
 
         elif data_cliente["type"] == "recrutador":
             r = Recrutador(data_cliente["nome"],data_cliente["nomeEmpresa"], data_cliente["senha"], data_cliente["usuario"])
-            ListaRecrutadores.append(r.usuario)
-
+            ListaRecrutadores.append(r)
             print(ListaRecrutadores)
+
+            v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
+            ListaVagas.append(v)
+
+            for i in ListaVagas:
+                print(i)
 
 
 def runServer():

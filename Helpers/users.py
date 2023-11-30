@@ -1,6 +1,6 @@
 import random
 import time
-# from vaga import Vaga
+from vaga import Vaga
 
 class Recrutador:
     def __init__(self, nome, nome_empresa, senha, nome_usuario):
@@ -16,8 +16,9 @@ class Recrutador:
     def usuario(self):
         return self.__usuario
     
-    def criar_vaga(self):
-        pass
+    def criar_vaga(self, nome, area, descricao, limite, salario, requisitos):
+        return Vaga(nome,area,descricao,limite, self.__nome_empresa, salario, requisitos )
+        
     
     def deletar_vaga(Self):
         pass
