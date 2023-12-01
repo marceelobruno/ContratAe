@@ -184,8 +184,6 @@ class Lista:
             raise ListaException(ae)
 
         
-
-        
     def __str__(self)->str:
         """ Método que retorna a ordenação atual dos elementos da pilha, do
             topo em direção à base
