@@ -1,6 +1,8 @@
 import random
 import time
 from vaga import Vaga
+from DataStructures.ListaSequencialNumPY import Lista
+
 class Recrutador:
     def __init__(self, nome, nome_empresa, senha, cpf):
         self.__nome = nome
@@ -12,13 +14,13 @@ class Recrutador:
     def nome(self):
         return self.__nome
     @property
-    def usuario(self):
-        return self.__usuario
+    def cpf(self):
+        return self.__cpf
     
     def criar_vaga(self, nome, area, descricao, limite, salario, requisitos):
         return Vaga(nome,area,descricao,limite, self.__nome_empresa, salario, requisitos )
     
-    def deletar_vaga(Self):
+    def deletar_vaga(self):
         pass
     
 class Candidato:
@@ -29,33 +31,66 @@ class Candidato:
         self.__cpf = cpf
         
         self.__skills = [None]
-        self.__area = None
-        self.__descricao = None
-        self.__cidade = None
-        self.__uf = None
-        self.__id = None
-        self.__vagas_aplicadas = []
+        self.__area = ""
+        self.__descricao = ""
+        self.__cidade = ""
+        self.__uf = ""
+        self.__id = "" #<----Adicionar no servidor
+        self.__vagas_aplicadas = Lista()
     
     @property
     def nome(self):
         return self.__nome
+    @property
+    def vagas_aplicadas(self):
+        return self.__vagas_aplicadas
+    @property
+    def id(self):
+        return self.__id
+    @id.setter
+    def id(self,value):
+        self.__id = value
 
-    def ver_vagas(self):
+
+    def ver_vagas(self): # <---servidor
         pass
-    # def candidatar(self, vaga: Vaga):
-    #     pass
+
+    def candidatar(self, vaga: Vaga):
+        return self.__vagas_aplicadas.append(vaga)
     
     def ver_candidaturas(self):
-        return self.__vagas_aplicadas
+        return self.__vagas_aplicadas# <----Printar o objeto inteiro ou só o nome?
     
-    def cancelar_candidatura(self):
-        pass
+    def cancelar_candidatura(self,key): #<----------APLICAR TRATAMENTO DE ERRO!!
+        posicao = self.__vagas_aplicadas.busca(key) 
+        return self.__vagas_aplicadas.remover(posicao)
     
-    def criar_perfil(self, skills:list, area, descricao, cidade, uf):
-        pass
+    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):
+        self.__skills = skills
+        self.__area = area
+        self.__descricao = descricao
+        self.__cidade = cidade
+        self.__uf = uf
     
-    # def __gerar_ID(self):
-    #     self.__id = int(time.time())
+    def __str__(self) -> str:  #<---------Opção Ver perfil do menu do cliente.
+        return f"""
+        Nome:{self.__nome}                         CPF: {self.__cpf}
+        email: {self.__email}
+        Cidade: {self.__cidade}
+        Uf: {self.__uf} 
+        skills:{self.__skills}
+
+""" 
     
-    def __str__(self) -> str:
-        return f"Nome:{self.__nome} email: {self.__email}"
+
+
+if __name__ == "__main__":
+    c = Candidato('luiz','lf',1234,100)
+    # c.vagas_aplicadas.append('casa')
+    # c.vagas_aplicadas.append('predio')
+    # c.vagas_aplicadas.append('ifpb')
+    # print(c.ver_candidaturas())
+    # c.cancelar_candidatura('predio')
+    # print(c.ver_candidaturas())
+    c.criar_perfil(['bahia','city','flamengo'])
+    print(c)

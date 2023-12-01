@@ -11,7 +11,11 @@ class Vaga:
         self.__salario = salario
         self.__requisitos = requisitos
         self.__lista_candidaturas = Lista() #lista do professor vulgo Alex
-        
+    
+    @property
+    def nome(self):
+        return self.__nome
+    
     def adicionarCandidatura(self,candidato):
         self.__lista_candidaturas.append(candidato.nome)
 
