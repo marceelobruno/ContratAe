@@ -16,23 +16,22 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
 clientes = {}
-TableCandidatos = ChainingHashTable()  # -> hash table
-ListaRecrutadores = Lista()
+TableCandidatos = ChainingHashTable()
+TableRecrutadores = ChainingHashTable()
 ListaVagas = []
 
 
 def handle_client(client_socket):
     pass
 
-
 def recrutador():
     pass
 
-
-def candidato():
-    pass
-
-
+def candidato(data_cliente, cliente):
+    user_candidato = TableCandidatos[data_cliente["cpf"]] # -> recuperando a referencia do objeto candidato
+    user_candidato = pickle.dumps(user_candidato)
+    cliente.send(user_candidato) # -> enviando a referencia do objeto para o cliente
+    
 def protocol(msg, cliente):
     """
         GET -> Pegar informações de candidaturas, informações de vagas e lista de candidatos (caso Recrutador).
@@ -41,14 +40,28 @@ def protocol(msg, cliente):
         EDIT -> Editar informações referentes ao perfil do usuário.
         APPLY -> Referente ao usuário candidatar-se a uma vaga.
     """
+    
     if msg == 'GET':
         
         data_cliente = cliente.recv(1024)
         data_cliente = pickle.loads(data_cliente)
         
         if data_cliente["type"] == "c":
-            pass
-        
+            # print()
+            print(data_cliente["cpf"])
+            # print()
+            
+            if (data_cliente["cpf"] in TableCandidatos):
+                
+                protocol_response = "200 Ok"
+                cliente.send(protocol_response.encode("utf-8"))
+                
+                candidato(data_cliente, cliente)
+                
+            else:
+                protocol_response = "404 Not Found"
+                cliente.send(protocol_response.encode("utf-8"))
+                
         elif data_cliente["type"] == "r":
             pass
         
@@ -63,33 +76,33 @@ def protocol(msg, cliente):
         # print(data_cliente)
 
         if data_cliente["type"] == "c":
+            
+            if data_cliente["cpf"] not in TableCandidatos:
+                TableCandidatos[data_cliente["cpf"]] = Candidato(
+                    data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
 
-            # candidato = Candidato(data_cliente["nome"], data_cliente["email"], data_cliente["senha"]) #-> intanciando um candidato usando as chaves do dicionario enviado pelo cliente.
-            # -> adicionando no dicionario o candidato e a chave Ã© o campo id.
-            TableCandidatos[data_cliente["id"]] = Candidato(
-                data_cliente["nome"], data_cliente["email"], data_cliente["senha"])
-            # TableCandidatos.showHashTable()
+                protocol_response = '201 OK: "Candidato cadastrado com Sucesso !"'
+                cliente.send(protocol_response.encode('utf-8'))
 
-            # protocol_response = '200 OK: "Candidato cadastrado com Sucesso !"'
-            # cliente.send(protocol_response.encode('utf-8'))
-
-            print()
-            print('Lista de Candidatos')
-            print()
+                candidato(data_cliente, cliente)
+                
+            else:
+                protocol_response = '400 Bad Request: "CPF já cadastrado."'
+                cliente.send(protocol_response.encode('utf-8'))
 
             print(TableCandidatos)
 
+
         elif data_cliente["type"] == "r":
-            r = Recrutador(data_cliente["nome"],data_cliente["nomeEmpresa"], data_cliente["senha"], data_cliente["usuario"])
-            ListaRecrutadores.append(r)
-            print(ListaRecrutadores)
+            r = Recrutador(data_cliente["nome"],data_cliente["nomeEmpresa"], data_cliente["senha"], data_cliente["cpf"])
+            
+            TableRecrutadores[data_cliente["cpf"]] = r
+            
+            # v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
+            # ListaVagas.append(v)
 
-            v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
-            ListaVagas.append(v)
-
-            for i in ListaVagas:
-                print(i)
-
+            # for i in ListaVagas:
+            #     print(i)
 
 def runServer():
     while True:
@@ -99,8 +112,5 @@ def runServer():
         t1 = threading.Thread(target=protocol, args=(
             protocol_msg.decode('utf-8'), cliente,))
         t1.start()
-
-        # NÃ£o estou conseguindo estabelecer dois clientes ao mesmo tempo
-
 
 runServer()
