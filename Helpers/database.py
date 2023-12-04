@@ -7,8 +7,10 @@ import sqlite3
 
 from loguru import logger
 
+# from pprint import pprint
 
-class Database():
+
+class Database:
     """_summary_
 
     Args:
@@ -25,49 +27,51 @@ class Database():
     def create_tables(self):
         """_summary_"""
         # Criação da tabela Candidato
-        self.c.execute("""
+        self.c.execute(
+            """
         CREATE TABLE IF NOT EXISTS [candidato] (
             ID INT NOT NULL,
             NOME VARCHAR(120) NOT NULL,
             EMAIL VARCHAR(40) NOT NULL,
-            --TYPE VARCHAR(15) NOT NULL,
-            SKILLS VARCHAR(100) NOT NULL,
-            AREA VARCHAR(100) NOT NULL,
-            DESCRICAO VARCHAR(250) NOT NULL,
-            CIDADE VARCHAR(50) NOT NULL,
-            UF CHAR(2) NOT NULL,
-            SENHA VARCHAR(256) NOT NULL,
+            SENHA VARCHAR(128) NOT NULL,
+            SKILLS VARCHAR(140),
+            AREA VARCHAR(120),
+            DESCRICAO VARCHAR(300),
+            CIDADE VARCHAR(40),
+            UF CHAR(2),
             -- APLICACOES,
             PRIMARY KEY (ID)
         );
-        """)
+        """
+        )
 
         # Criação da tabela Recrutador
-        self.c.execute("""
+        self.c.execute(
+            """
         CREATE TABLE IF NOT EXISTS [recrutador] (
             ID INT NOT NULL,
             NOME VARCHAR(120) NOT NULL,
-            EMPRESA VARCHAR(120) NOT NULL,
+            EMPRESA VARCHAR(80) NOT NULL,
             EMAIL VARCHAR(40) NOT NULL,
-            SENHA VARCHAR(256) NOT NULL,
-            --TYPE VARCHAR(15) NOT NULL,
-            -- NOME_USUARIO VARCHAR(30) NOT NULL,
+            SENHA VARCHAR(128) NOT NULL,
             PRIMARY KEY (ID)
         );
-        """)
+        """
+        )
 
         # Criação da tabela Vagas
-        self.c.execute("""
+        self.c.execute(
+            """
         CREATE TABLE IF NOT EXISTS [vaga] (
             ID INT NOT NULL,
             NOME VARCHAR(120) NOT NULL,
-            ID_RECRUTADOR INT NOT NULL
+            ID_RECRUTADOR INT NOT NULL,
             AREA VARCHAR(40) NOT NULL,
-            DESCRICAO VARCHAR(250) NOT NULL,
+            DESCRICAO VARCHAR(300) NOT NULL,
             LIMITE INT NOT NULL,
             NOME_EMPRESA VARCHAR(100) NOT NULL,
             SALARIO DECIMAL(10,2) NOT NULL,
-            REQUISITO VARCHAR(100) NOT NULL,
+            REQUISITO VARCHAR(140) NOT NULL,
             -- LISTA_CANDIDATURAS,
             PRIMARY KEY (ID)
             CONSTRAINT fk_recrutador
@@ -75,28 +79,40 @@ class Database():
                 REFERENCES recrutador (ID)
                 ON DELETE CASCADE
         );
-        """)
+        """
+        )
         logger.info("Tabelas criadas")
 
 
 class CandidatoDB(Database):
-    """ Descricao """
+    """Descricao"""
+
     def __init__(self) -> None:
         super().__init__()
 
-    def insert_candidato(self, id_num: int, nome: str, e_mail: str,
-                         skills: str, area: str, descricao: str,
-                         cidade: str, uf: str, passwd: str) -> None:
+    def insert_candidato(
+        self,
+        id_num: int,
+        nome: str,
+        e_mail: str,
+        passwd: str,
+        skills: str = None,
+        area: str = None,
+        descricao: str = None,
+        cidade: str = None,
+        uf: str = None,
+    ) -> None:
         """_summary_"""
 
-        self.c.execute("""INSERT INTO candidato
-                       (ID, NOME, EMAIL, SKILLS, AREA, DESCRICAO, CIDADE, UF, SENHA)
+        self.c.execute(
+            """INSERT INTO candidato
+                       (ID, NOME, EMAIL, SENHA, SKILLS, AREA, DESCRICAO, CIDADE, UF)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                       (id_num, nome, e_mail, skills,
-                        area, descricao, cidade, uf, passwd))
+            (id_num, nome, e_mail, passwd, skills, area, descricao, cidade, uf),
+        )
         self.conn.commit()
         self.conn.close()
-        logger.info(f"Candidato cadastrado: {id_num} {nome}")
+        logger.info(f"Candidato: {id_num} {nome} inserido no Bando de Dados!")
 
     def delete_candidato(self, id_num: int) -> None:
         """_summary_"""
@@ -109,12 +125,12 @@ class CandidatoDB(Database):
         """_summary_"""
         self.c.execute(f"SELECT SENHA FROM candidato WHERE ID = {id_num}")
         self.conn.commit()
-        logger.info(f"Senha informada para o Candidato: {id_num}")
+        logger.info(f"\nSenha informada para o Candidato: {id_num}")
         # Retorna a senha em str
         return self.c.fetchone()[0]
 
     def get_all_candidato(self) -> tuple:
-        """_summary_"""
+        """Retorna todos os dados da tabela candidato"""
         self.c.execute("SELECT * FROM candidato")
         self.conn.commit()
         logger.info("Retornando todos registros da tabela Candidato")
@@ -123,17 +139,21 @@ class CandidatoDB(Database):
 
 
 class RecrutadorDB(Database):
-    """ Descricao """
+    """Descricao"""
+
     def __init__(self) -> None:
         super().__init__()
 
-    def insert_recrutador(self, id_num: int, nome: str, empresa: str,
-                          e_mail: str, passwd: str) -> None:
+    def insert_recrutador(
+        self, id_num: int, nome: str, empresa: str, e_mail: str, passwd: str
+    ) -> None:
         """_summary_"""
-        self.c.execute("""INSERT INTO recrutador
+        self.c.execute(
+            """INSERT INTO recrutador
                        (ID, NOME, EMPRESA, EMAIL, SENHA)
                        VALUES (?, ?, ?, ?, ?)""",
-                       (id_num, nome, empresa, e_mail, passwd))
+            (id_num, nome, empresa, e_mail, passwd),
+        )
         self.conn.commit()
         self.conn.close()
         logger.info(f"Recrutador cadastrado: {id_num} {nome}")
@@ -154,7 +174,7 @@ class RecrutadorDB(Database):
         return self.c.fetchone()[0]
 
     def get_all_recrutador(self) -> tuple:
-        """_summary_"""
+        """### Retorna todos os dados da tabela Recrutador"""
         self.c.execute("SELECT * FROM recrutador")
         self.conn.commit()
         logger.info("Retornando todos registros da tabela Recrutador")
@@ -163,20 +183,41 @@ class RecrutadorDB(Database):
 
 
 class VagaDB(Database):
-    """ Descricao """
+    """Descricao"""
+
     def __init__(self) -> None:
         super().__init__()
 
-    def insert_vaga(self, id_vaga: int, nome: str, area: str,
-                    descricao: str, limite: int, empresa: str,
-                    salario: float, requisito: str) -> None:
+    def insert_vaga(
+        self,
+        id_vaga: int,
+        nome: str,
+        id_recrutador: int,
+        area: str,
+        descricao: str,
+        limite: int,
+        empresa: str,
+        salario: float,
+        requisito: str,
+    ) -> None:
         """_summary_"""
 
-        self.c.execute("""INSERT INTO vaga
-                       (ID, NOME, AREA, DESCRICAO, LIMITE, NOME_EMPRESA, SALARIO, REQUISITO)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                       (id_vaga, nome, area, descricao,
-                        limite, empresa, salario, requisito))
+        self.c.execute(
+            """INSERT INTO vaga
+                       (ID, NOME, ID_RECRUTADOR, AREA, DESCRICAO, LIMITE, NOME_EMPRESA, SALARIO, REQUISITO)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                id_vaga,
+                nome,
+                id_recrutador,
+                area,
+                descricao,
+                limite,
+                empresa,
+                salario,
+                requisito,
+            ),
+        )
         self.conn.commit()
         self.conn.close()
 
@@ -208,24 +249,30 @@ if __name__ == "__main__":
 
     cpf = CPF()
 
+    while True:
+        pf = cpf.generate()
+        if len(pf) < 11:
+            pf = cpf.generate()
+        break
+
+    identificador = pf  # int(time.time())
     firstNAme = names.get_first_name()
     lastName = names.get_last_name()
-    nomeComp = firstNAme + ' ' + lastName
-    email = firstNAme.lower() + '_' + lastName.lower() + '@yahoo.com'
-    company = names.get_first_name() + ' ' + 'Inc'
-    tabelinha = 'candidato'
+    nomeComp = firstNAme + " " + lastName
+    email = firstNAme.lower() + "_" + lastName.lower() + "@yahoo.com"
+    company = names.get_first_name() + " " + "Company"
+    tabelinha = "candidato"
     senha = secrets.token_hex()
-    identificador = cpf.generate()   # int(time.time())
-    ident = 2533189472
+    ident = 35498103859
 
     idVaga = os.getpid()
-    idRecrut = 4956572808
-    nomeVaga = 'Pessoa Engenheira de Machine Learning Sênior'
-    areaVaga = 'Machine Learning'
-    descVaga = 'Sua missão será desenvolver, programar e testar sistemas de aprendizado de máquinas'
+    idRecrut = 88533305621
+    nomeVaga = "Desenvolvedor Pleno"
+    areaVaga = "Desenvolvedor de Softwares"
+    descVaga = "Testar sistemas"
     limiteVaga = 10
-    salarioVaga = '12500.00'
-    requisitoVaga = 'Python fluente e Desenvolver Modelos e algoritmos de Machine Learning'
+    salarioVaga = "4500.00"
+    requisitoVaga = "Python, Django"
 
     dt = Database()
     candidato = CandidatoDB()
@@ -233,13 +280,17 @@ if __name__ == "__main__":
     vaga = VagaDB()
 
     # Cria as tabelas caso não existam
-    dt.create_tables()
+    # dt.create_tables()
 
     # VALIDANDO MÉTODOS DA CLASSE CANDIDATO
-    # candidato.insert_candidato(identificador, nomeComp, email, 'trabalhador', 'Analista', '5 anos na profissão', 'Cabedelo', 'PB', senha)
+    # candidato.insert_candidato(identificador, nomeComp, email, senha, 'Bussiness Inteligence,  QlickSense', 'TI', 'Analista', 'Mataraca', 'PB')
     # candidato.delete_candidato(ident)
     # print(candidato.get_candidato_passwrd(ident))
-    # print('CANDIDATOS:\n', candidato.get_all_candidato(), type(candidato.get_all_candidato()))
+    print(
+        "CANDIDATOS:\n",
+        candidato.get_all_candidato(),
+        type(candidato.get_all_candidato()),
+    )
 
     # VALIDANDO MÉTODOS DA CLASSE RECRUTADOR
     # recrutador.insert_recrutador(identificador, nomeComp, company, email, senha)
@@ -248,6 +299,16 @@ if __name__ == "__main__":
     # print('RECRUTADORES:\n', recrutador.get_all_recrutador())
 
     # VALIDANDO MÉTODOS DA CLASSE VAGA
-    # vaga.insert_vaga(idVaga, nomeVaga, areaVaga, descVaga, limiteVaga, company, salarioVaga, requisitoVaga)
+    # vaga.insert_vaga(
+    #     idVaga,
+    #     nomeVaga,
+    #     idRecrut,
+    #     areaVaga,
+    #     descVaga,
+    #     limiteVaga,
+    #     company,
+    #     salarioVaga,
+    #     requisitoVaga,
+    # )
     # vaga.delete_vaga(2440)
-    # print('VAGAS\n', vaga.get_all_vaga())
+    # print('VAGAS:\n', vaga.get_all_vaga())
