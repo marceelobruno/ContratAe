@@ -1,7 +1,6 @@
 from DataStructures.ListaSequencialNumPY import Lista
 from vaga import Vaga
 
-
 class Recrutador:
     def __init__(self, nome, nome_empresa, senha, cpf):
         self.__nome = nome
@@ -16,7 +15,7 @@ class Recrutador:
     @property
     def cpf(self):
         return self.__cpf
-
+    
     def criar_vaga(self, nome, area, descricao, limite, salario, requisitos):
         return Vaga(
             nome, area, descricao, limite, self.__nome_empresa, salario, requisitos
@@ -24,7 +23,6 @@ class Recrutador:
 
     def deletar_vaga(self):
         pass
-
 
 class Candidato:
     def __init__(
@@ -55,6 +53,10 @@ class Candidato:
     @property
     def nome(self):
         return self.__nome
+    
+    @property
+    def senha(self):
+        return self.__senha
 
     @property
     def vagas_aplicadas(self):
@@ -68,7 +70,7 @@ class Candidato:
     def id(self, value):
         self.__id = value
 
-    def ver_vagas(self):  # <---servidor
+    def ver_vagas(self): # <---servidor
         pass
 
     def candidatar(self, vaga: Vaga):
@@ -99,8 +101,11 @@ class Candidato:
         Area: {self.__area}
         Descricao: {self.__descricao}
         Cidade: {self.__cidade}
-        UF: {self.__uf}\n
-"""
+        Uf: {self.__uf} 
+        skills:{self.__skills}
+
+""" 
+    
 
 
 if __name__ == "__main__":
