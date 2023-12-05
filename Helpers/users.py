@@ -53,6 +53,10 @@ class Candidato:
     @property
     def nome(self):
         return self.__nome
+    
+    @property
+    def senha(self):
+        return self.__senha
 
     @property
     def vagas_aplicadas(self):
@@ -65,7 +69,6 @@ class Candidato:
     @id.setter
     def id(self, value):
         self.__id = value
-
 
     def ver_vagas(self): # <---servidor
         pass

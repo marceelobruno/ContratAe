@@ -51,18 +51,22 @@ def run_cliente():
 def entar(type, action):
     
     if action == "login":
-        protocol_msg = "GET"  # -> verificar se o usuário existe
+        # -> verificar se o usuário existe
+        protocol_msg = "GET"
         cliente_socket.send(protocol_msg.encode('utf-8'))
+        
         while True:
             data_cliente = {}
             data_cliente["type"] = type
             data_cliente["cpf"] = input('CPF: ')
-            data_cliente["senha"] = input('Senha: ')
+            # hasheando a senha para sha256
+            hash_passwd = sha256(input("senha: ").encode())
+            # convertendo a senha de bytes para hexadecimal
+            data_cliente["senha"] = hash_passwd.hexdigest()
 
             try:
                 # -> usando o pickle para transformar em binario
-                data_cliente = pickle.dumps(data_cliente)
-                cliente_socket.send(data_cliente)  # -> enviando via sockets
+                cliente_socket.send(pickle.dumps(data_cliente))  # -> enviando via sockets
 
                 response_server = pickle.loads(cliente_socket.recv(1024))
                 
@@ -77,21 +81,17 @@ def entar(type, action):
                 print('Conexão com o servidor não foi estabelecida corretamente')
 
     elif action == "criar":
-        
+        protocol_msg = "POST"  # -> definindo a flag do protocolo.
+        cliente_socket.send(protocol_msg.encode('utf-8'))
         while True:
-            protocol_msg = "POST"  # -> definindo a flag do protocolo.
-            cliente_socket.send(protocol_msg.encode('utf-8'))
-
             data_cliente = {}
             data_cliente["nome"] = input("Digite o nome: ")
             data_cliente["email"] = input("Digite o email: ")
             data_cliente["cpf"] = input("Digite seu CPF: ")
-            data_cliente["senha"] = input("Digite sua senha: ")
             data_cliente["type"] = type
             
-            senha = input("Digite sua senha: ")
             # hasheando a senha para sha256
-            hash_passwd = sha256(senha.encode())
+            hash_passwd = sha256(input("Digite sua senha: ").encode())
             # convertendo a senha de bytes para hexadecimal
             data_cliente["senha"] = hash_passwd.hexdigest()
             
@@ -101,7 +101,6 @@ def entar(type, action):
             cliente_socket.send(pickle.dumps(data_cliente))  # -> envian via sockets
             response_server = cliente_socket.recv(1024)
             response_server = pickle.loads(response_server) # -> resposta do servidor
-            logger.info(f'{response_server}')
         
             if response_server["status"] == "400 Bad Request":
                 print(response_server["message"])

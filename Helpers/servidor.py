@@ -1,17 +1,13 @@
 """
 Servidor
 """
-
 import pickle
 import socket
 import threading
-from loguru import logger
+
 from DataStructures.ChainingHashTable import ChainingHashTable
 from loguru import logger
 from users import Candidato, Recrutador
-import os
-from cliente import run
-
 from database import CandidatoDB  # , RecrutadorDB, VagaDB
 
 # from vaga import Vaga
@@ -64,18 +60,20 @@ def get_candidatos_from_db() -> None:
     return logger.info('Candidatos inseridos na HashTable')
 
 def handle_client(cliente):
+    print(cliente)
     protocol_msg = cliente.recv(1024)
-    protocol(cliente, protocol_msg.decode('utf-8'))
+    print(protocol_msg)
+    protocol(protocol_msg.decode('utf-8'), cliente)
     
 def recrutador():
     pass
 
-def candidato(data_cliente, cliente):
-    user_candidato = TableCandidatos[
-        data_cliente["cpf"]
-    ]  # -> recuperando a referencia do objeto candidato
-    user_candidato = pickle.dumps(user_candidato)
-    cliente.send(user_candidato)  # -> enviando a referencia do objeto para o cliente
+def candidato(data_cliente):
+    user_candidato = TableCandidatos[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
+    if user_candidato:
+        return user_candidato # -> enviando a referencia do objeto para o cliente
+    else:
+        return None
 
 def protocol(protocol_msg, cliente):
     """
@@ -86,60 +84,72 @@ def protocol(protocol_msg, cliente):
     APPLY -> Referente ao usuário candidatar-se a uma vaga.
     """
     if protocol_msg == 'GET':
-        data_cliente = pickle.loads(cliente.recv(1024))
-    
-        if data_cliente["type"] == "c":
-            protocol_response = candidato(data_cliente)
-            cliente.send(pickle.dumps(protocol_response))
-        else:
-            protocol_response = recrutador(data_cliente)
-            cliente.send(pickle.dumps(protocol_response))
+        while True:
+            print("entrei", protocol_msg)
+            data_cliente = pickle.loads(cliente.recv(1024))
         
-    elif protocol_msg == 'POST':
-
-        data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
-        data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
-
-        if data_cliente["type"] == "c":
-            if data_cliente["cpf"] not in TableCandidatos:
-                TableCandidatos[data_cliente["cpf"]] = Candidato(
-                    data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
+            if data_cliente["type"] == "c":
+                user_candidato = candidato(data_cliente)
+                if user_candidato:
+                    if user_candidato.senha == data_cliente["senha"]:
+                        protocol_response = {"status": "200 Ok", "data": user_candidato}
+                        cliente.send(pickle.dumps(protocol_response))
+                        break
+                    else:
+                        protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
+                else:
+                    protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
                 
-                user_candidato = TableCandidatos[data_cliente["cpf"]]
-                logger.info(f'{user_candidato}')
-                protocol_response = {"status": '201 Created', "data": user_candidato}
                 cliente.send(pickle.dumps(protocol_response))
                 
             else:
-                protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
-                cliente.send(pickle.dumps(protocol_response))
+                # protocol_response = recrutador(data_cliente)
+                # cliente.send(pickle.dumps(protocol_response))
+                pass
+        
+    elif protocol_msg == 'POST':
+        while True:
+            print("entrei", protocol_msg)
+            data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
+            data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
 
-            print(TableCandidatos)
+            if data_cliente["type"] == "c":
+                if data_cliente["cpf"] not in TableCandidatos:
+                    TableCandidatos[data_cliente["cpf"]] = Candidato(
+                        data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
+                    
+                    user_candidato = TableCandidatos[data_cliente["cpf"]]
+                    logger.info(f'{user_candidato}')
+                    protocol_response = {"status": '201 Created', "data": user_candidato}
+                    cliente.send(pickle.dumps(protocol_response))
+                    print(TableCandidatos)
+                     # Inserindo os dados do Candidato no Banco de Dados
+                    candidate = CandidatoDB()
+                    candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
+                    data_cliente["email"], data_cliente["senha"])
+                    break
+                else:
+                    protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
+                    cliente.send(pickle.dumps(protocol_response))
 
-        elif data_cliente["type"] == "r":
-            r = Recrutador(
-                data_cliente["nome"],
-                data_cliente["nomeEmpresa"],
-                data_cliente["senha"],
-                data_cliente["cpf"],
-            )
+            elif data_cliente["type"] == "r":
+                r = Recrutador(
+                    data_cliente["nome"],
+                    data_cliente["nomeEmpresa"],
+                    data_cliente["senha"],
+                    data_cliente["cpf"],
+                )
 
-            TableRecrutadores[data_cliente["cpf"]] = r
+                TableRecrutadores[data_cliente["cpf"]] = r
+                break
+                # v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
+                # ListaVagas.append(v)
 
-            # v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
-            # ListaVagas.append(v)
-
-            # for i in ListaVagas:
-            #     print(i)
+                # for i in ListaVagas:
+                #     print(i)
 
 
-def runServer():
-    if os.name == 'nt':  # Verifica se é Windows
-        threading.Thread(target=run).start()
-    else:
-        pid = os.fork()
-        if pid == 0:
-            run()
+def run_server():
     while True:
         cliente, addr = server.accept()
         t1 = threading.Thread(target=handle_client, args=(cliente,))
@@ -147,5 +157,5 @@ def runServer():
 
 # Retornando os dados da tabela candidato para a hashtable-candidato
 get_candidatos_from_db()
-runServer()
+run_server()
 
