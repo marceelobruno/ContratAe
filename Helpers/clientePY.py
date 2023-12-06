@@ -139,23 +139,23 @@ def dashboard(user, type):
         
 """)
         if entrada == '1':
-            protocol_mesage = 'GET'
+            protocol_msg = 'GET'
             action = 'verVagas'
 
         elif entrada == '2':
-            protocol_mesage = 'APPLY'
+            protocol_msg = 'APPLY'
             action = 'candidatar'
 
         elif entrada == '3':
-            protocol_mesage = 'GET'
+            protocol_msg = 'GET'
             action = 'verPerfil'
 
-        cliente_socket.send(pickle.dumps(protocol_mesage))
-        time.sleep(5)
+        cliente_socket.send(pickle.dumps(protocol_msg))
         data_cliente = {'action':action, 'type': 'c'}
         cliente_socket.send(pickle.dumps(data_cliente))
 
         if action == 'verVagas':
+            
             response_server = cliente_socket.recv(1024)
             response_server = pickle.loads(response_server) # -> resposta do servidor
         

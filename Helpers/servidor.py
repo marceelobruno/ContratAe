@@ -69,6 +69,7 @@ def handle_client(cliente):
         protocol_msg = pickle.loads(protocol_msg)
         t2 = threading.Thread(target=protocol, args=(protocol_msg,cliente,))
         t2.start()
+        # protocol(protocol_msg, cliente)
 
 def recrutador():
     pass
@@ -79,8 +80,6 @@ def candidato(data_cliente):
         return user_candidato # -> enviando a referencia do objeto para o cliente
     else:
         return None
-
-
 
 def protocol(protocol_msg, cliente):
     """
@@ -102,6 +101,7 @@ def protocol(protocol_msg, cliente):
                         if user_candidato.senha == data_cliente["senha"]:
                             protocol_response = {"status": "200 Ok", "data": user_candidato}
                             cliente.send(pickle.dumps(protocol_response))
+                            handle_client(cliente)
                             break
                         else:
                             protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
@@ -113,15 +113,18 @@ def protocol(protocol_msg, cliente):
                 elif data_cliente['action'] == 'verVagas':
                     if len(ListaVagas) == 0:
                         protocol_response = {"status": "404 Not Found", "message": 'Não há vagas...'}
+                        cliente.send(pickle.dumps(protocol_response))
+                        break
                     else:
                         protocol_response = {"status": "200 OK", "data": ListaVagas}
+                        cliente.send(pickle.dumps(protocol_response))
+                        break
 
-                    cliente.send(pickle.dumps(protocol_response))
             else:
                 # protocol_response = recrutador(data_cliente)
                 # cliente.send(pickle.dumps(protocol_response))
                 pass
-        
+            
     elif protocol_msg == 'POST':
         while True:
             print("entrei", protocol_msg)
@@ -142,10 +145,14 @@ def protocol(protocol_msg, cliente):
                     candidate = CandidatoDB()
                     candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
                     data_cliente["email"], data_cliente["senha"])
+                    handle_client(cliente)
                     break
+                
                 else:
                     protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
                     cliente.send(pickle.dumps(protocol_response))
+                    
+                
 
             elif data_cliente["type"] == "r":
                 r = Recrutador(
@@ -167,8 +174,6 @@ def protocol(protocol_msg, cliente):
                 ListaVagas.append(v2)
 
                 # print(ListaVagas)
-                    
-
 
 def run_server():
     while True:
