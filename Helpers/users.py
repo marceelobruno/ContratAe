@@ -73,19 +73,31 @@ class Candidato:
     def ver_vagas(self): # <---servidor
         pass
 
-    def candidatar(self, vaga: Vaga):
+    def candidatar(self, vaga: Vaga):#<-----em análise
         return self.__vagas_aplicadas.append(vaga)
+    
+    def ver_candidaturas(self)->None:
+        """Mostra as candidaturas efetuadas pelo candidato.
+        """
+        for i in self.__vagas_aplicadas:
+            print(i)
+    
+    def cancelar_candidatura(self,key:str) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
+        """Remove a vaga especifíca da lista de vagas aplicadas. 
 
-    def ver_candidaturas(self):
-        return self.__vagas_aplicadas  # <----Printar o objeto inteiro ou só o nome?
+        Args:
+            key (str): Atributo nome do objeto Vaga. 
 
-    def cancelar_candidatura(self, key):  # <----------APLICAR TRATAMENTO DE ERRO!!
-        posicao = self.__vagas_aplicadas.busca(key)
-        return self.__vagas_aplicadas.remover(posicao)
-
-    def criar_perfil(
-        self, skills: list, area: str, descricao: str, cidade: str, uf: str
-    ):
+        Returns:
+            None
+        """
+        for i in range(len(self.__vagas_aplicadas)):
+            if self.__vagas_aplicadas[i].nome == key:
+                posicao = i
+                break
+        self.__vagas_aplicadas.pop(posicao)
+    
+    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):#<-----em análise
         self.__skills = skills
         self.__area = area
         self.__descricao = descricao
@@ -109,12 +121,12 @@ class Candidato:
 
 
 if __name__ == "__main__":
-    c = Candidato("luiz", "lf", 1234, 100)
+    c = Candidato('luiz','lf',1234,100)
     # c.vagas_aplicadas.append('casa')
     # c.vagas_aplicadas.append('predio')
     # c.vagas_aplicadas.append('ifpb')
     # print(c.ver_candidaturas())
     # c.cancelar_candidatura('predio')
     # print(c.ver_candidaturas())
-    c.criar_perfil(["bahia", "city", "flamengo"])
+    c.criar_perfil(['bahia','city','flamengo'])
     print(c)
