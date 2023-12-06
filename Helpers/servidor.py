@@ -5,7 +5,8 @@ import pickle
 import socket
 import threading
 
-from DataStructures.ChainingHashTable import ChainingHashTable
+from DataStructures.ChainingHashTable import ChainingHashTable 
+from DataStructures.ListaSequencialNumPY import Lista
 from loguru import logger
 from users import Candidato, Recrutador
 from database import CandidatoDB  # , RecrutadorDB, VagaDB
@@ -22,7 +23,7 @@ server.bind((HOST, PORT))
 server.listen()
 TableCandidatos = ChainingHashTable()
 TableRecrutadores = ChainingHashTable()
-ListaVagas = []
+ListaVagas = Lista()
 
 def get_candidatos_from_db() -> None:
     """Retornando os dados da tabela candidato para a hashtable-candidato"""
@@ -60,11 +61,15 @@ def get_candidatos_from_db() -> None:
     return logger.info('Candidatos inseridos na HashTable')
 
 def handle_client(cliente):
-    print(cliente)
-    protocol_msg = cliente.recv(1024)
-    print(protocol_msg)
-    protocol(protocol_msg.decode('utf-8'), cliente)
-    
+
+    # while True:
+        # print(cliente)
+        protocol_msg = cliente.recv(1024)
+        # protocol_msg = protocol_msg.decode('utf-8')
+        protocol_msg = pickle.loads(protocol_msg)
+        t2 = threading.Thread(target=protocol, args=(protocol_msg,cliente,))
+        t2.start()
+
 def recrutador():
     pass
 
@@ -74,6 +79,8 @@ def candidato(data_cliente):
         return user_candidato # -> enviando a referencia do objeto para o cliente
     else:
         return None
+
+
 
 def protocol(protocol_msg, cliente):
     """
@@ -89,19 +96,27 @@ def protocol(protocol_msg, cliente):
             data_cliente = pickle.loads(cliente.recv(1024))
         
             if data_cliente["type"] == "c":
-                user_candidato = candidato(data_cliente)
-                if user_candidato:
-                    if user_candidato.senha == data_cliente["senha"]:
-                        protocol_response = {"status": "200 Ok", "data": user_candidato}
-                        cliente.send(pickle.dumps(protocol_response))
-                        break
+                if data_cliente['action'] == 'login':
+                    user_candidato = candidato(data_cliente)
+                    if user_candidato:
+                        if user_candidato.senha == data_cliente["senha"]:
+                            protocol_response = {"status": "200 Ok", "data": user_candidato}
+                            cliente.send(pickle.dumps(protocol_response))
+                            break
+                        else:
+                            protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
                     else:
-                        protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
-                else:
-                    protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
-                
-                cliente.send(pickle.dumps(protocol_response))
-                
+                        protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
+                    
+                    cliente.send(pickle.dumps(protocol_response))
+
+                elif data_cliente['action'] == 'verVagas':
+                    if len(ListaVagas) == 0:
+                        protocol_response = {"status": "404 Not Found", "message": 'Não há vagas...'}
+                    else:
+                        protocol_response = {"status": "200 OK", "data": ListaVagas}
+
+                    cliente.send(pickle.dumps(protocol_response))
             else:
                 # protocol_response = recrutador(data_cliente)
                 # cliente.send(pickle.dumps(protocol_response))
@@ -141,16 +156,23 @@ def protocol(protocol_msg, cliente):
                 )
 
                 TableRecrutadores[data_cliente["cpf"]] = r
-                break
-                # v = r.criar_vaga('teste','TI','dinheiro bom',10,'1300,00', 'cérebro')
-                # ListaVagas.append(v)
+                
+                v = r.criar_vaga('IFPB','TI','dinheiro bom',10,'1300,00', 'cérebro')
+                v1 = r.criar_vaga('IFPB JOAO PESSOA','TI','WALTER',10,'1300,00', 'cérebro')
+                v2 = r.criar_vaga('CAMPINA GRANDE','TI','CACADCADC bom',10,'1300,00', 'cérebro')
 
-                # for i in ListaVagas:
-                #     print(i)
+
+                ListaVagas.append(v)
+                ListaVagas.append(v1)
+                ListaVagas.append(v2)
+
+                # print(ListaVagas)
+                    
 
 
 def run_server():
     while True:
+        print( 'teste')
         cliente, addr = server.accept()
         t1 = threading.Thread(target=handle_client, args=(cliente,))
         t1.start()

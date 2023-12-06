@@ -23,7 +23,8 @@ class Vaga:
         return self.__lista_candidaturas
     
     def __str__(self) -> str:
-        return f"""
+        return f""" 
+------------------------------------
     Nome: {self.__nome}
     Area: {self.__area}
     Empresa: {self.__nome_empresa}
@@ -32,6 +33,7 @@ class Vaga:
     Salario: {self.__salario}
     Limite de Vagas: {self.__limite}
     Descrição: {self.__descricao}
+------------------------------------
 """
     
 # if __name__ == '__main__':
