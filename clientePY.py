@@ -25,3 +25,4 @@ data_cliente["senha"] = "1234"
 # -> usando o pickle para transformar em binario
 data_cliente = pickle.dumps(data_cliente)  
 cliente_socket.send(data_cliente)  # -> enviando via sockets
+
