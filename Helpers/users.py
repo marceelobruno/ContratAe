@@ -21,6 +21,16 @@ class Recrutador:
             nome, area, descricao, limite, self.__nome_empresa, salario, requisitos
         )
 
+    def dict_user(self):
+        user_dict = {
+            "nome": self.__nome,
+            "email": self.__email,
+            "cpf": self.__cpf,
+            "nome_empresa": self.__nome_empresa
+        }
+
+        return user_dict
+
     def deletar_vaga(self):
         pass
 
@@ -103,6 +113,20 @@ class Candidato:
         self.__descricao = descricao
         self.__cidade = cidade
         self.__uf = uf
+    
+    def dict_user(self):
+        user_dict = {
+            "nome": self.__nome,
+            "email": self.__email,
+            "cpf": self.__cpf,
+            "skills": self.__skills,
+            "area": self.__area,
+            "descricao": self.__descricao,
+            "cidade": self.__cidade,
+            "uf": self.__uf,
+        }
+
+        return user_dict
 
     def __str__(self) -> str:  # <---------Opção Ver perfil do menu do cliente.
         return f"""

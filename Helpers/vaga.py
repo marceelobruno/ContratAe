@@ -21,6 +21,20 @@ class Vaga:
 
     def mostrarCandidaturas(self):
         return self.__lista_candidaturas
+
+    def dict_user(self):
+        return {
+            "nome": self.__nome,
+            "area": self.__area,
+            "descricao": self.__descricao,
+            "limite": self.__limite,
+            "nome_empresa": self.__nome_empresa,
+            "salario": self.__salario,
+            "requisitos": self.__requisitos,
+            "lista_candidaturas": self.__lista_candidaturas
+        }
+
+        return user_dict
     
     def __str__(self) -> str:
         return f""" 

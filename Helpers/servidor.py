@@ -130,8 +130,9 @@ def protocol(protocol_msg, cliente):
             print("entrei", protocol_msg)
             data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
             data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
-
-            if data_cliente["type"] == "c":
+            
+            print(type(data_cliente["type"]))
+            if str(data_cliente["type"]) == "c":
                 if data_cliente["cpf"] not in TableCandidatos:
                     TableCandidatos[data_cliente["cpf"]] = Candidato(
                         data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])

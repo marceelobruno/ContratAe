@@ -40,23 +40,12 @@ def run_cliente():
                 print(ae)
 
         if login == 1:
-
-            if type_user == "c":
-                entar(type_user, 'login')
-                break
-            else:
-                entar('r', 'login')
-                break
+            entar(type_user, 'login')
+            break
 
         elif login == 2:
-
-            if type_user == "c":
-                entar('c', 'criar')
-                break
-            else:
-                entar('r', 'criar')
-                break
-
+            entar(type_user, 'criar')
+            break
         # except:
         #     print()
         #     print("opção inválida")
