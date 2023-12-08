@@ -191,11 +191,10 @@ class Lista:
         Returns:
            str: a carga dos elementos da pilha, do topo até a base
         """  
-        s = 'inicio->[ '
+        s = ''
         for i in range(len(self)):
-            s += f'{self.__array[i]}, '
-        s = s.rstrip(', ')
-        s += ' ]'
+            s += f'{self.__array[i]}'
+        s += ' '
         return s
 
         

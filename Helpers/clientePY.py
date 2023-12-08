@@ -118,47 +118,94 @@ def entar(type, action):
 
 
 def dashboard(user, type):
-    
+
     if type == "c": # -> aqui ficará a área do candidato
+
+        print('Bem-vindo ao ContratAe!\n\nPara continuar é necessário que preencha as demais informações do perfil.')
+
+        cand_area = input('Área de atuação: ')
+        listSkills = []
+        while True:
+            cand_skills = input('Digite suas competências, 1 por vez (Digite "." para encerrar)')
+            if cand_skills == '.':
+                break
+            listSkills.append(cand_skills)
+
+        cand_descricao = input('Digite uma breve descrição ( até 140 caracteres ): ')
+        cand_cidade = input('Informe sua cidade: ')
+        cand_uf = input('Informe seu estado: ')
+
+        user.criar_perfil(listSkills, cand_area, cand_descricao, cand_cidade, cand_uf) 
         print(user)
-        entrada = input("""
-        1-Ver vagas
-        2-Candidatar a vaga
-        3-Ver perfil
-        
-""")
-        if entrada == '1':
-            protocol_msg = 'GET'
-            action = 'verVagas'
 
-        elif entrada == '2':
-            protocol_msg = 'APPLY'
-            action = 'candidatar'
+        while True:
+            while True:
+                try:
+                    entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Ver perfil\n4-Cancelar candidatura\n5-Ver candidaturas')
+                    assert entrada in ['1','2','3','4'], 'Escolha uma dessas opções'
+                    break
+                except AssertionError as ae:
+                    print(ae)
+            idVaga = ''
+            if entrada == '1':
+                protocol_msg = 'GET'
+                action = 'verVagas'
 
-        elif entrada == '3':
-            protocol_msg = 'GET'
-            action = 'verPerfil'
+            elif entrada == '2':
+                protocol_msg = 'APPLY'
+                action = 'candidatar'
+                while True:
+                    try:
+                        idVaga = int(input('Digite o id da vaga: '))
+                        break
+                    except ValueError:
+                        print('Digite um número inteiro.')
 
-        cliente_socket.send(pickle.dumps(protocol_msg))
-        data_cliente = {'action':action, 'type': 'c'}
-        cliente_socket.send(pickle.dumps(data_cliente))
+            elif entrada == '3':
+                protocol_msg = 'UNAPPLY'
+                action = 'cancelarCand'
+                while True:
+                    try:
+                        idVaga = int(input('Digite o id da vaga: '))
+                        break
+                    except ValueError:
+                        print('Digite um número inteiro.')                
 
-        if action == 'verVagas':
+            elif entrada == '4':
+                protocol_msg = 'GET'
+                action = 'verPerfil'
+
             
-            response_server = cliente_socket.recv(1024)
-            response_server = pickle.loads(response_server) # -> resposta do servidor
-        
-            if response_server["status"] == "404 Not Found":
-                print(response_server["message"])
-            else:
-                print(response_server['data'])
 
 
-        
+            cliente_socket.send(pickle.dumps(protocol_msg))
+            data_cliente = {'action': action, 'type': 'c', 'idVaga': idVaga, 'cpf': user.cpf }
+            cliente_socket.send(pickle.dumps(data_cliente))
+
+            if action == 'verVagas':
+
+                response_server = cliente_socket.recv(1024)
+                response_server = pickle.loads(response_server) # -> resposta do servidor
+            
+                if response_server["status"] == "404 Not Found":
+                    print(response_server["message"])
+                else:
+                    for i in response_server['data']:
+                        print(i)
+
+            if action == 'candidatar':
+
+                response_server = cliente_socket.recv(1024)
+                response_server = pickle.loads(response_server) # -> resposta do 
+                
+                if response_server['status'] == "200 OK":
+                    logger.info(response_server['message'])
+                else:
+                    logger.error(response_server['message'])
+
 
     elif type == 'r':
         pass
         
 
-    
 run_cliente()

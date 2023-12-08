@@ -41,7 +41,7 @@ class Candidato:
         email: str,
         senha: str,
         cpf: str,
-        skills: str = None,
+        skills: list = None,
         area: str = None,
         descricao: str = None,
         cidade: str = None,
@@ -57,8 +57,7 @@ class Candidato:
         self.__descricao = descricao  # ""
         self.__cidade = cidade  # ""
         self.__uf = uf  # ""
-        self.__id = ""  # <----Adicionar no servidor
-        self.__vagas_aplicadas = Lista()
+        self.__vagas_aplicadas = []
 
     @property
     def nome(self):
@@ -73,15 +72,9 @@ class Candidato:
         return self.__vagas_aplicadas
 
     @property
-    def id(self):
-        return self.__id
+    def cpf(self):
+        return self.__cpf
 
-    @id.setter
-    def id(self, value):
-        self.__id = value
-
-    def ver_vagas(self): # <---servidor
-        pass
 
     def candidatar(self, vaga: Vaga):#<-----em análise
         return self.__vagas_aplicadas.append(vaga)
@@ -89,8 +82,8 @@ class Candidato:
     def ver_candidaturas(self)->None:
         """Mostra as candidaturas efetuadas pelo candidato.
         """
-        for i in self.__vagas_aplicadas:
-            print(i)
+        return self.__vagas_aplicadas
+            
     
     def cancelar_candidatura(self,key:str) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
         """Remove a vaga especifíca da lista de vagas aplicadas. 
@@ -130,7 +123,8 @@ class Candidato:
 
     def __str__(self) -> str:  # <---------Opção Ver perfil do menu do cliente.
         return f"""
-        Nome: {self.__nome}                         CPF: {self.__cpf}
+        Nome: {self.__nome}                         
+        CPF: {self.__cpf}
         Email: {self.__email}
         Senha: {self.__senha}
         Skills: {self.__skills}
@@ -138,7 +132,8 @@ class Candidato:
         Descricao: {self.__descricao}
         Cidade: {self.__cidade}
         Uf: {self.__uf} 
-        skills:{self.__skills}
+        
+
 
 """ 
     
