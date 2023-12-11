@@ -1,18 +1,16 @@
 # from users import Candidato
-from DataStructures.ListaSequencialNumPY import Lista
-import random
 
 class Vaga:
-    def __init__(self, nome, area, descricao, limite:int, nome_empresa, salario, requisitos):
+    def __init__(self, nome, area, descricao, quantidade:int, nome_empresa, salario, requisitos):
         self.__nome = nome
         self.__id = random.randint(1,9999) 
         self.__area = area
         self.__descricao = descricao
-        self.__limite = limite
+        self.__quantidade = quantidade
         self.__nome_empresa = nome_empresa
         self.__salario = salario
         self.__requisitos = requisitos
-        self.__lista_candidaturas = Lista(self.__limite) #lista do professor vulgo Alex
+        self.__lista_candidaturas = []  # lista do professor vulgo Alex
     
     @property
     def nome(self):
@@ -37,7 +35,7 @@ class Vaga:
             "nome": self.__nome,
             "area": self.__area,
             "descricao": self.__descricao,
-            "limite": self.__limite,
+            "quantidade": self.__quantidade,
             "nome_empresa": self.__nome_empresa,
             "salario": self.__salario,
             "requisitos": self.__requisitos,
@@ -47,16 +45,16 @@ class Vaga:
         return user_dict
     
     def __str__(self) -> str:
-        return f""" 
+        return f"""
 ------------------------------------
     Nome: {self.__nome}
     ID: {self.__id}
     Area: {self.__area}
-    Empresa: {self.__nome_empresa}
+    Empresa: {self.__nome_empresa} 
     Requisitos: {self.__requisitos}
 
     Salario: {self.__salario}
-    Limite de Vagas: {self.__limite}
+    Quantidade de Vagas: {self.__quantidade}
     Descrição: {self.__descricao}
 ------------------------------------
 """
