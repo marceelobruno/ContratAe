@@ -1,16 +1,15 @@
 """
-Servidor
+Servidor - Protocolo SPC (Securitas Protocol ContratAe)
 """
 import pickle
 import socket
 import threading
 
-from DataStructures.ChainingHashTable import ChainingHashTable 
+from DataStructures.ChainingHashTable import ChainingHashTable
 from DataStructures.ListaSequencialNumPY import Lista
 from loguru import logger
+from supabase_db import CandidatoDB, RecrutadorDB
 from users import Candidato, Recrutador
-from vaga import Vaga
-from database import CandidatoDB  # , RecrutadorDB, VagaDB
 
 # from vaga import Vaga
 
@@ -26,40 +25,55 @@ TableCandidatos = ChainingHashTable()
 TableRecrutadores = ChainingHashTable()
 ListaVagas = []
 
-def get_candidatos_from_db() -> None:
-    """Retornando os dados da tabela candidato para a hashtable-candidato"""
-    candidatos = CandidatoDB()
-    data = candidatos.get_all_candidato()
 
-    candidato_dict = {}
+def get_candidatos_from_supabase() -> None:
+    """Retornando os dados da tabela Candidato para a hashtable-candidato"""
+    candidatos = CandidatoDB()
+    data = candidatos.get_all_candidatos()
 
     for i, candidate in enumerate(data):  # manter o i ao lado do for
-        lista_candidatos = candidate
-        candidato_dict = {"cpf": str(lista_candidatos[0]),
-                          "nome": lista_candidatos[1],
-                          "email": lista_candidatos[2],
-                          "senha": lista_candidatos[3],
-                          "skills": lista_candidatos[4],
-                          "area": lista_candidatos[5],
-                          "descricao": lista_candidatos[6],
-                          "cidade": lista_candidatos[7],
-                          "uf": lista_candidatos[8],
-                        }
+        list_candidate = candidate
 
-        TableCandidatos[candidato_dict["cpf"]] = Candidato(
-            candidato_dict["nome"],
-            candidato_dict["email"],
-            candidato_dict["senha"],
-            candidato_dict["cpf"],
-            candidato_dict["skills"],
-            candidato_dict["area"],
-            candidato_dict["descricao"],
-            candidato_dict["cidade"],
-            candidato_dict["uf"],
+        TableCandidatos[list_candidate["cpf"]] = Candidato(
+            list_candidate["nome"],
+            list_candidate["email"],
+            list_candidate["senha"],
+            list_candidate["cpf"],
+            list_candidate["skills"],
+            list_candidate["area"],
+            list_candidate["descricao"],
+            list_candidate["cidade"],
+            list_candidate["uf"],
         )
 
-    # print(TableCandidatos)
+    print(TableCandidatos)
     return logger.info('Candidatos inseridos na HashTable')
+
+
+def get_recrutadores_from_supabase() -> None:
+    """Retornando os dados da tabela recrutador para a hashtable-recrutador"""
+    recrutador = RecrutadorDB()
+    rec_data = recrutador.get_all_recrutadores()
+
+    for i, recruiter in enumerate(rec_data):  # manter o i ao lado do for
+        list_recruiter = recruiter
+
+        TableRecrutadores[list_recruiter["cpf"]] = Recrutador(
+            list_recruiter["nome"],
+            list_recruiter["email"],
+            list_recruiter["senha"],
+            list_recruiter["cpf"],
+            list_recruiter["empresa"],
+        )
+    print(TableRecrutadores)
+    return logger.info('Recrutadores inseridos na HashTable')
+
+
+def get_recrutadores_from_db() -> None:
+    """Retornando os dados da tabela Candidato para a hashtable-candidato"""
+    # recrutador = RecrutadorDB()
+    # data = recrutador.get_all_recrutadores()
+
 
 def handle_client(cliente):
 
@@ -131,31 +145,32 @@ def protocol(protocol_msg, cliente):
     elif protocol_msg == 'POST':
         while True:
             print("entrei", protocol_msg)
-            data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
+            data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informacoes de tipo e cada campo de acordo com o tipo
             data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
             
+            print(type(data_cliente["type"]))
+
             if str(data_cliente["type"]) == "c":
-                if data_cliente['action'] == 'criar':
-                    if data_cliente["cpf"] not in TableCandidatos:
-                        TableCandidatos[data_cliente["cpf"]] = Candidato(
-                            data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
-                        
-                        user_candidato = TableCandidatos[data_cliente["cpf"]]
-                        logger.info(f'{user_candidato}')
-                        protocol_response = {"status": '201 Created', "data": user_candidato}
-                        cliente.send(pickle.dumps(protocol_response))
-                        # print(TableCandidatos)
-                        # Inserindo os dados do Candidato no Banco de Dados
-                        candidate = CandidatoDB()
-                        candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
-                        data_cliente["email"], data_cliente["senha"])
-                        handle_client(cliente)
-                        break
+                if data_cliente["cpf"] not in TableCandidatos:
+                    TableCandidatos[data_cliente["cpf"]] = Candidato(
+                        data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
                     
-                    else:
-                        protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
-                        cliente.send(pickle.dumps(protocol_response))
-                        
+                    user_candidato = TableCandidatos[data_cliente["cpf"]]
+                    logger.info(f'{user_candidato}')
+                    protocol_response = {"status": '201 Created', "data": user_candidato}
+                    cliente.send(pickle.dumps(protocol_response))
+                    print(TableCandidatos)
+                     # Inserindo os dados do Candidato no Banco de Dados
+                    candidate = CandidatoDB()
+                    candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
+                    data_cliente["email"], data_cliente["senha"])
+                    handle_client(cliente)
+                    break
+                
+                else:
+                    protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
+                    cliente.send(pickle.dumps(protocol_response))
+                    
                 
 
             elif data_cliente["type"] == "r":
@@ -165,6 +180,11 @@ def protocol(protocol_msg, cliente):
                     data_cliente["senha"],
                     data_cliente["cpf"],
                 )
+
+                # Inserindo os dados do Recrutador no Banco de Dados
+                recruiter = RecrutadorDB()
+                recruiter.insert_recrutador(data_cliente["cpf"], data_cliente["nome"],
+                data_cliente["nomeEmpresa"], data_cliente["email"], data_cliente["senha"])
 
                 TableRecrutadores[data_cliente["cpf"]] = r
                 
@@ -240,7 +260,13 @@ def run_server():
         t1 = threading.Thread(target=handle_client, args=(cliente,))
         t1.start()
 
-# Retornando os dados da tabela candidato para a hashtable-candidato
-get_candidatos_from_db()
-run_server()
 
+# Retornando os dados da tabela candidato para a hashtable-candidato
+get_candidatos_from_supabase()
+
+get_recrutadores_from_supabase()
+# print(TableCandidatos)
+print()
+print()
+# print(TableRecrutadores)
+run_server()

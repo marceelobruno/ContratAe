@@ -1,4 +1,6 @@
 __pycache__/
-teste.py
-test.py
+test_*.py
+teste_*.py
 database_*.py
+database.py
+.env

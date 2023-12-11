@@ -242,7 +242,7 @@ class VagaDB(Database):
 
 
 if __name__ == "__main__":
-    import os
+    import random
 
     import names
     from validate_docbr import CPF
@@ -263,7 +263,7 @@ if __name__ == "__main__":
     company = names.get_first_name() + " " + "Company"
     tabelinha = "candidato"
     senha = secrets.token_hex()
-    ident = 35498103859
+    ident = 77755588899
 
     idVaga = os.getpid()
     idRecrut = 88533305621
@@ -283,14 +283,14 @@ if __name__ == "__main__":
     # dt.create_tables()
 
     # VALIDANDO MÉTODOS DA CLASSE CANDIDATO
-    # candidato.insert_candidato(identificador, nomeComp, email, senha, 'Bussiness Inteligence,  QlickSense', 'TI', 'Analista', 'Mataraca', 'PB')
+    candidato.insert_candidato(identificador, nomeComp, email, senha, 'Bussiness Inteligence,  QlickSense', 'TI', 'Analista', 'Jampa', 'PB')
     # candidato.delete_candidato(ident)
     # print(candidato.get_candidato_passwrd(ident))
-    print(
-        "CANDIDATOS:\n",
-        candidato.get_all_candidato(),
-        type(candidato.get_all_candidato()),
-    )
+    # print(
+    #     "CANDIDATOS:\n",
+    #     candidato.get_all_candidato(),
+    #     type(candidato.get_all_candidato()),
+    # )
 
     # VALIDANDO MÉTODOS DA CLASSE RECRUTADOR
     # recrutador.insert_recrutador(identificador, nomeComp, company, email, senha)
