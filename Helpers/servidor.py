@@ -87,8 +87,8 @@ def protocol(protocol_msg, cliente):
     GET -> Pegar informações de candidaturas, informações de vagas e lista de candidatos (caso Recrutador).
     POST -> Postar informações como vaga, novo usuário ou recrutador.
     DELETE -> Deletar usuários (Recrutador e Candidato) e vagas.
-    UNAPPLY -> Retira a candidatura de uma vaga.
     APPLY -> Referente ao usuário candidatar-se a uma vaga.
+    UNAPPLY -> Retira a candidatura de uma vaga.
     """
     if protocol_msg == 'GET':
         while True:
@@ -123,9 +123,7 @@ def protocol(protocol_msg, cliente):
                         handle_client(cliente)
                         break
 
-            else:
-                # protocol_response = recrutador(data_cliente)
-                # cliente.send(pickle.dumps(protocol_response))
+            elif data_cliente["type"] == "r":
                 pass
             
     elif protocol_msg == 'POST':
@@ -134,9 +132,12 @@ def protocol(protocol_msg, cliente):
             data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informaÃ§Ãµes de tipo e cada campo de acordo com o tipo
             data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
             
-            if str(data_cliente["type"]) == "c":
+            if data_cliente["type"] == "c":
+                
                 if data_cliente['action'] == 'criar':
+                    
                     if data_cliente["cpf"] not in TableCandidatos:
+                        
                         TableCandidatos[data_cliente["cpf"]] = Candidato(
                             data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
                         
@@ -144,40 +145,53 @@ def protocol(protocol_msg, cliente):
                         logger.info(f'{user_candidato}')
                         protocol_response = {"status": '201 Created', "data": user_candidato}
                         cliente.send(pickle.dumps(protocol_response))
-                        # print(TableCandidatos)
+                        
                         # Inserindo os dados do Candidato no Banco de Dados
                         candidate = CandidatoDB()
                         candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
                         data_cliente["email"], data_cliente["senha"])
+                        
                         handle_client(cliente)
                         break
-                    
+
                     else:
                         protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
                         cliente.send(pickle.dumps(protocol_response))
                         
-                
-
             elif data_cliente["type"] == "r":
-                r = Recrutador(
-                    data_cliente["nome"],
-                    data_cliente["nomeEmpresa"],
-                    data_cliente["senha"],
-                    data_cliente["cpf"],
-                )
-
-                TableRecrutadores[data_cliente["cpf"]] = r
                 
-                v = r.criar_vaga('IFPB','TI','dinheiro bom',1,'1300,00', 'cérebro')
-                v1 = r.criar_vaga('IFPB JOAO PESSOA','TI','WALTER',10,'1300,00', 'cérebro')
-                v2 = r.criar_vaga('CAMPINA GRANDE','TI','vaga para react',10,'1300,00', 'cérebro')
-
-
-                ListaVagas.append(v)
-                ListaVagas.append(v1)
-                ListaVagas.append(v2)
-
-                # print(ListaVagas)
+                if data_cliente['action'] == 'criar':
+                    
+                    if data_cliente["cpf"] not in TableRecrutadores:
+            
+                        TableRecrutadores[data_cliente["cpf"]] = Recrutador(
+                            data_cliente["nome"],
+                            data_cliente["nomeEmpresa"],
+                            data_cliente["senha"],
+                            data_cliente["cpf"],
+                        )
+                        
+                        protocol_response = {"status": '201 Created', "data": TableRecrutadores[data_cliente["cpf"]]}
+                        cliente.send(pickle.dumps(protocol_response))
+                        handle_client(cliente)
+                        break
+                    else:
+                        protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
+                        cliente.send(pickle.dumps(protocol_response))
+                        
+                elif data_cliente["action"] == "criar_vaga":
+                    user_recrutador = TableRecrutadores[data_cliente["cpf"]]
+                    vaga_info = pickle.loads(cliente.recv(1024))
+                    
+                    ListaVagas.append(user_recrutador.criar_vaga(vaga_info["nome_vaga"],
+                          vaga_info["area_vaga"],
+                          vaga_info["descricao_vaga"],
+                          vaga_info["quant_candidaturas"],
+                          vaga_info["salario_vaga"], vaga_info["requisitos"]))
+                    
+                    protocol_response = {"status": '201 Created', "message": "Vaga criada !"}
+                    cliente.send(pickle.dumps(protocol_response))
+                    break
 
     elif protocol_msg == 'APPLY':
         while True:
@@ -228,11 +242,9 @@ def protocol(protocol_msg, cliente):
                         if i.id == idVaga:
                             indice_remocao = candi.vagas_aplicadas.index(i)
                             candi.cancelar_candidatura(indice_remocao)
-
-
-
-                              
-
+                            handle_client(cliente)
+                            break
+                        
 def run_server():
     print( 'teste')
     while True:
