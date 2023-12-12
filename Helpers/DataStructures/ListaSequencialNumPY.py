@@ -1,202 +1,245 @@
-import numpy as np
-
 class ListaException(Exception):
-    def __init__(self,mensagem):
-        super().__init__(mensagem)
-
-
-class Lista:
-    """A classe Pilha implementa a estrutura de dados "Pilha".
-       Técnica: <Encadeamento/Sequencial>
-       A classe foi desenvolvida de maneira a permitir que qualquer tipo de dado
-       seja armazenado como carga de um nó.
-
-     Atributos:
-     ---------------------
-        *definir a lista de atributos*
+    """Classe de exceção lançada quando uma violação de ordem genérica
+       da lista é identificada.
     """
-    def __init__(self, size:int=10):
-        """ Construtor padrão da classe Pilha sem argumentos. Ao instanciar
-            um objeto do tipo Pilha, esta iniciará vazia. 
+
+    def __init__(self,msg):
+        """ Construtor padrão da classe, que recebe uma mensagem que se deseja
+            embutir na exceção
         """
-        self.__array = np.full(size,any,dtype=object)
-        self.__posAtual = -1
-        
+        super().__init__(msg)
+
+
+
+class Node:
+    '''
+    Classe de objetos para criação de um nó dinâmico na memória
+    '''
+    def __init__(self,data):
+        self.__data = data
+        self.__next = None
+    
+    @property
+    def data(self):
+        return self.__data
+    
+    @data.setter
+    def data(self, newData):
+        self.__data = newData
+
+    @property
+    def next(self):
+        return self.__next
+    
+    @next.setter
+    def next(self, newNext):
+        self.__next = newNext
+
+    def hasNext(self):
+        return self.__next != None
+    
+    def __str__(self):
+        return str(self.__data)
+
+   
+	    
+class Lista:
+    '''
+    Classe de objetos para armazenamento e gerenciamento de elementos
+    de uma lista simplesmente encadeada ordenada.
+    Nesse tipo de lista, os elementos são inseridos de forma ordenada
+    de acordo com a chave de ordenação.
+    '''
+    def __init__(self):
+        self.__head = None
+        self.__tamanho = 0
+
     def estaVazia(self)->bool:
-        """ Método que verifica se a pilha está vazia .
-
-        Returns:
-            boolean: True se a pilha estiver vazia, False caso contrário.
-
-        Examples:
-            p = Pilha()
-            ...   # considere que temos internamente na pilha [10,20,30,40]<- topo
-            if(p.estaVazia()): 
-               # instrucoes quando a pilha estiver vazia
-        """
-        return self.__posAtual == -1
-
-    def estaCheia(self)->bool:
-        """ Método que verifica se a pilha está vazia .
-
-        Returns:
-            boolean: True se a pilha estiver vazia, False caso contrário.
-
-        Examples:
-            p = Pilha()
-            ...   # considere que temos internamente na pilha [10,20,30,40]<- topo
-            if(p.estaVazia()): 
-               # instrucoes quando a pilha estiver vazia
-        """
-        return self.__posAtual == len(self.__array)-1
-
+        '''
+        Verifica se a lista está vazia
+        Retorno:
+          True se a lista estiver vazia e False caso contrário
+        '''
+        return self.__tamanho == 0 
 
     def __len__(self)->int:
-        """ Método que retorna a quantidade de elementos existentes na pilha
-
-        Returns:
-            int: um número inteiro que determina o número de elementos existentes na pilha
-
-        Examples:
-            p = Pilha()
-            ...   # considere que temos internamente a pilha [10,20,30,40]<- p
-            print (p.tamanho()) # exibe 4
-        """ 
-        return self.__posAtual + 1
+        '''
+        Retorna o número de elementos armazenados na lista
+        '''
+        return self.__tamanho
 
     def elemento(self, posicao:int)->any:
-        """ Método que recupera a carga armazenada em um determinado elemento da pilha
-
-        Args:
-            posicao (int): um número correpondente à ordem do elemento existente.
-                           Sentido: da base em direção ao topo
-        
-        Returns:
-            Any: a carga armazenada no elemento correspondente à posição indicada.
-
+        '''
+        Retorna a carga armazenada em um elemento especificado pela posição
+        indicada como parâmetro.
+        Parâmetros:
+          posicao(int): a posição do elemento desejado
+        Retorno:
+          o elemento armazenado na posição especificada
         Raises:
-            PilhaException: Exceção lançada quando uma posição inválida é
-                  fornecida pelo usuário. São inválidas posições que se referem a:
-                  (a) números negativos
-                  (b) zero
-                  (c) número natural correspondente a uma posição  que excede a
-                      quantidade de elementos da lista.                      
-        Examples:
-            p = Pilha()
-            ...   # considere que temos internamente a pilha [10,20,30,40]<-topo
-            posicao = 5
-            print (p.elemento(3)) # exibe 30
-        """
+            ListaException: se a posição for inválida ou a lista estiver vazia
+        '''
         try:
-            assert self.estaVazia() == False, 'Lista está vazia'
-            assert posicao > 0 and posicao <= len(self), f'Posição {posicao} é inválida para a lista com {len(self)} elementos'
-            return self.__array[posicao-1]
+            assert not self.estaVazia(), 'Lista vazia'
+            assert posicao > 0 and posicao <= len(self), f'Posicao invalida. Lista contém {self.__tamanho} elementos'
+
+            cursor = self.__head
+            contador = 1
+            while( cursor != None  and contador < posicao):
+                cursor = cursor.next
+                contador += 1
+
+            return cursor.data
+
         except AssertionError as ae:
             raise ListaException(ae)
-                
-    def busca(self, key:any)->int:
-        """ Método que retorna a posicao ordenada, dentro da pilha, em que se
-            encontra uma chave passado como argumento. No caso de haver mais de uma
-            ocorrência do valor, a primeira ocorrência será retornada.
-            O ordenamento que determina a posição é da base para o topo.
 
-        Args:
-            key (any): um item de dado que deseja procurar na pilha
-        
-        Returns:
-            int: um número inteiro representando a posição, na pilha, em que foi
-                 encontrada a chave.
 
+
+    def modificar(self, posicao:int, carga: any):
+        '''
+        Modifica a carga de um elemento especificado pela posição
+        indicada como parâmetro.
+        Parâmetros:
+          posicao(int): a posição do elemento desejado
+          carga(any): a nova carga do elemento
         Raises:
-            PilhaException: Exceção lançada quando o argumento "key"
-                  não está presente na pilha.
-
-        Examples:
-            p = Pilha()
-            ...   # considere que temos internamente a lista [10,20,30,40]<-topo
-            print (p.elemento(40)) # exibe 4
-        """
-        for i in range(len(self)):
-            if self.__array[i] == key:
-                return i+1
-        raise ListaException(f'A chave {key} não está presente na lista')
-
-
-    def inserir(self, posicao:int, carga:any):
-        """ Método que adiciona um novo elemento ao topo da pilha
-
-        Args:
-            carga (any): a carga que será armazenada no novo elemento do topo da pilha.
-
-        Examples:
-            p = Pilha()
-            ...   # considere a pilha  [10,20,30,40]<-topo
-            p.empilha(50)
-            print(p)  # exibe [10,20,30,40,50]
-        """
+            ListaException: se a posição for inválida ou a lista estiver vazia
+        '''
         try:
-            assert not self.estaCheia(), 'Lista está cheia'
-            assert posicao > 0 and posicao <= len(self)+1, f'Posição {posicao} é inválida para a lista com {len(self)} elementos'
+            assert not self.estaVazia(), 'Lista vazia'
+            assert posicao > 0 and posicao <= len(self), f'A posicao deve ser um inteiro > 0 e menor igual a {self.__tamanho}'
+
+            cursor = self.__head
+            contador = 1
+            while( cursor != None and contador < posicao ):
+                cursor = cursor.next
+                contador += 1
+
+            cursor.data = carga
+        except TypeError:
+            raise ListaException(f'A posição deve ser um número do tipo inteiro')            
+        except AssertionError as ae:
+            raise ListaException(ae.__str__())
+   
+    
+    def busca(self, chave:any)->int:
+        '''
+        Busca um elemento na lista a partir de uma chave fornecida 
+        como argumento.
+        Parâmetros:
+            chave(any): a chave de busca 
+        Retorno:
+            a posição do elemento na lista
+        Raises:
+            ListaException: se a chave não for encontrada ou a lista estiver vazia
+        '''
+        if (self.estaVazia()):
+            raise ListaException(f'Lista vazia')
+
+        cursor = self.__head
+        contador = 1
+
+        while( cursor != None ):
+            if( cursor.data == chave):
+                return contador
+            cursor = cursor.next
+            contador += 1
             
-            for i in range(self.__posAtual+1,posicao-1 ,-1):
-                self.__array[i] = self.__array[i-1]
-            self.__array[posicao-1] = carga
-            self.__posAtual += 1
+        raise ListaException(f'A chave {chave} não está armazenado na lista')
 
-        except AssertionError as ae:
-            raise ListaException(ae)
+    def inserir(self, carga:any ):
+        '''
+        Insere um elemento na lista de forma ordenada.
+        Parâmetros:
+            carga(any): a carga do elemento a ser inserido
+        '''
+        # CONDICAO 1: insercao se a lista estiver vazia
+        novoNo = Node(carga)
+        if (self.estaVazia()):
+            self.__head = novoNo
+        elif (carga < self.__head.data):
+            # CONDICAO 2: insercao na primeira posicao em uma lista nao vazia
+            novoNo.next = self.__head
+            self.__head = novoNo
+        else:
+            # CONDICAO 3: insercao apos a primeira posicao em lista nao vazia
+            cursor = self.__head
+            while (cursor.next is not None and cursor.next.data < carga):
+                cursor = cursor.next
 
-
-    def append(self, carga:any):
-        self.inserir(len(self)+1, carga)
-
+            novoNo.next = cursor.next
+            cursor.next = novoNo
+        self.__tamanho += 1
 
     def remover(self, posicao:int)->any:
-        """ Método que remove um elemento do topo da pilha e retorna
-            sua carga correspondente.
-    
-        Returns:
-           any: a carga armazenada no elemento removido
-
+        '''
+        Remove um elemento da lista a partir de uma posição fornecida
+        como argumento.
+        Parâmetros:
+            posicao(int): a posição do elemento a ser removido
+        Retorno:
+            a carga do elemento removido
         Raises:
-            PilhaException: Exceção lançada quando se tenta remover algo de uma pilha vazia
-                    
-        Examples:
-            p = Pilha()
-            ...   # considere a pilha [10,20,30,40]<-topo
-            dado = p.desemplha()
-            print(p) # exibe [10,20,30]
-            print(dado) # exibe 40
-        """
+            ListaException: se a posição for inválida ou a lista estiver vazia
+        '''
         try:
-            assert not self.estaVazia(), 'Lista está vazia'
-            assert posicao > 0 and posicao <= len(self), f'Posição {posicao} é inválida para a lista com {len(self)} elementos'
+            if( self.estaVazia() ):
+                raise ListaException(f'Não é possível remover de uma lista vazia')
+            
+            assert posicao > 0 and posicao <= len(self), f'Posicao invalida. Lista contém {self.__tamanho} elementos'
 
-            carga = self.__array[posicao-1]
+            cursor = self.__head
+            contador = 1
 
-            for i in range(posicao-1, len(self)-1):
-                self.__array[i] = self.__array[i+1]
+            while( contador <= posicao-1 ) :
+                anterior = cursor
+                cursor = cursor.next
+                contador+=1
 
+            data = cursor.data
 
-            self.__posAtual -= 1
+            if( posicao == 1):
+                self.__head = cursor.next
+            else:
+                anterior.next = cursor.next
+
+            self.__tamanho -= 1
+            return data
+        
+        except TypeError:
+            raise ListaException(f'A posição deve ser um número inteiro')            
+        except AssertionError:
+            raise ListaException(f'A posicao não pode ser um número negativo')
+      
+              
+    def __str__(self):
+        '''
+        Retorna uma representação em string da lista
+        '''
+        str = 'Lista: [ '
+        if self.estaVazia():
+            str+= ']'
+            return str
+
+        cursor = self.__head
+
+        while( cursor != None ):
+            str += f'{cursor.data}, '
+            cursor = cursor.next
+
+        str = str[:-2] + " ]"
+        return str
+
+    # Métodos para implementação do protocolo "Iterator"
+    def __iter__(self)->any:
+        self.__ponteiro = self.__head
+        return self
+    
+    def __next__(self)->any:
+        if (self.__ponteiro == None):
+            raise StopIteration
+        else:
+            carga = self.__ponteiro.data
+            self.__ponteiro = self.__ponteiro.next
             return carga
-        except AssertionError as ae:
-            raise ListaException(ae)
-
-        
-    def __str__(self)->str:
-        """ Método que retorna a ordenação atual dos elementos da pilha, do
-            topo em direção à base
-
-        Returns:
-           str: a carga dos elementos da pilha, do topo até a base
-        """  
-        s = ''
-        for i in range(len(self)):
-            s += f'{self.__array[i]}'
-        s += ' '
-        return s
-
-        
-
- 

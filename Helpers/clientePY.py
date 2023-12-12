@@ -140,8 +140,10 @@ def dashboard(user, type):
         while True:
             while True:
                 try:
-                    entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Ver perfil\n4-Cancelar candidatura\n5-Ver candidaturas')
-                    assert entrada in ['1','2','3','4'], 'Escolha uma dessas opções'
+                    print()
+                    entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Cancelar candidatura\n4-Ver perfil\n5-Ver candidaturas\n\n')
+                    print()
+                    assert entrada in ['1','2','3','4','5'], 'Escolha uma opções acima.'
                     break
                 except AssertionError as ae:
                     print(ae)
@@ -158,7 +160,7 @@ def dashboard(user, type):
                         idVaga = int(input('Digite o id da vaga: '))
                         break
                     except ValueError:
-                        print('Digite um número inteiro.')
+                        print('Digite um número inteiro referente a vaga em questão.')
 
             elif entrada == '3':
                 protocol_msg = 'UNAPPLY'
@@ -168,37 +170,53 @@ def dashboard(user, type):
                         idVaga = int(input('Digite o id da vaga: '))
                         break
                     except ValueError:
-                        print('Digite um número inteiro.')                
+                        print('Digite um número inteiro referente a vaga em questão.')                
 
             elif entrada == '4':
+                print(user)
+
+            elif entrada == '5':
                 protocol_msg = 'GET'
-                action = 'verPerfil'
+                action = 'verCandidaturas'
 
-            cliente_socket.send(pickle.dumps(protocol_msg))
-            data_cliente = {'action': action, 'type': 'c', 'idVaga': idVaga, 'cpf': user.cpf }
-            cliente_socket.send(pickle.dumps(data_cliente))
+            if entrada in ['1','2','3','5']:
 
-            if action == 'verVagas':
+                cliente_socket.send(pickle.dumps(protocol_msg))
+                data_cliente = {'action': action, 'type': 'c', 'idVaga': idVaga, 'cpf': user.cpf }
+                cliente_socket.send(pickle.dumps(data_cliente))
 
-                response_server = cliente_socket.recv(1024)
-                response_server = pickle.loads(response_server) # -> resposta do servidor
-            
-                if response_server["status"] == "404 Not Found":
-                    print(response_server["message"])
-                else:
-                    for i in response_server['data']:
-                        print(i)
+                if action == 'verVagas':
 
-            if action == 'candidatar':
+                    response_server = cliente_socket.recv(1024)
+                    response_server = pickle.loads(response_server) # -> resposta do servidor
 
-                response_server = cliente_socket.recv(1024)
-                response_server = pickle.loads(response_server) # -> resposta do 
+                    if response_server["status"] == "404 Not Found":
+                        print(response_server["message"])
+                    else:
+                        for i in response_server['data']:
+                            print(i)
+
+                elif action == 'candidatar' or action == 'cancelarCand':
+
+                    response_server = cliente_socket.recv(1024)
+                    response_server = pickle.loads(response_server) # -> resposta do 
+                    
+                    if response_server['status'] == "200 OK":
+                        logger.info(response_server['message'])
+                    else:
+                        logger.error(response_server['message'])
+                    
+                elif action == 'verCandidaturas':
+
+                    response_server =  cliente_socket.recv(1024)
+                    response_server = pickle.loads(response_server)
+
+                    if response_server['status']  == '200 OK':
+                        for vaga in response_server['data']:
+                            print(vaga)
+                    if response_server['status'] == '404 Not Found':
+                        print(response_server['message'])
                 
-                if response_server['status'] == "200 OK":
-                    logger.info(response_server['message'])
-                else:
-                    logger.error(response_server['message'])
-
 
     elif type == 'r':
         logger.info(user)
@@ -222,7 +240,7 @@ def dashboard(user, type):
                 break
             dict_vaga["requisitos"].append(resquisito_vaga)
         
-        data_cliente = {'action': "criar_vaga", 'type': 'r', 'cpf': user.cpf }
+        data_cliente = {'action': "criar_vaga", 'type': 'r', 'cpf': user.cpf, 'empresa': user.empresa }
         cliente_socket.send(pickle.dumps(data_cliente))
         cliente_socket.send(pickle.dumps(dict_vaga))
         
