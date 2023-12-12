@@ -1,5 +1,6 @@
 # from users import Candidato
-
+from DataStructures.ListaSequencialNumPY import Lista
+import random
 class Vaga:
     def __init__(self, nome, area, descricao, quantidade:int, nome_empresa, salario, requisitos):
         self.__nome = nome
@@ -21,7 +22,7 @@ class Vaga:
     
     def adicionarCandidatura(self,candidato):
         self.__lista_candidaturas.append(candidato.cpf)
-        self.__limite += 1
+        self.__limite -=1
 
     def mostrarCandidaturas(self):
         return self.__lista_candidaturas
@@ -29,9 +30,8 @@ class Vaga:
     def vagaEstaCheia(self):
         return self.__lista_candidaturas.estaCheia()
     
-
-    def dict_user(self):
-        return {
+    def dict_vaga(self):
+        vaga_dict =  {
             "nome": self.__nome,
             "area": self.__area,
             "descricao": self.__descricao,
@@ -42,7 +42,7 @@ class Vaga:
             "lista_candidaturas": self.__lista_candidaturas
         }
 
-        return user_dict
+        return vaga_dict
     
     def __str__(self) -> str:
         return f"""

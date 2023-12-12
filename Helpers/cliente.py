@@ -7,10 +7,8 @@ from hashlib import sha256
 HOST = '127.0.0.1'
 PORT_HTTP = 8000
 PORT_TCP = 5000
-
 class Http_class(SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
         super().end_headers()
 
     def _set_headers(self, status=200, content_type='application/json'):
@@ -22,15 +20,21 @@ class Http_class(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_OPTIONS(self):
-        self._set_headers()
-
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")  # 24 horas
+        self.end_headers()
+        
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         json_data = self.rfile.read(content_length)  # -> Recebendo o dado via HTTP    
 
+        data_cliente = json.loads(json_data.decode('utf-8')) # -> Lendo os dados JSON 
         # Tratamento do protocolo no servidor
-        protocol_msg = "POST" # -> Menssagem para o protocolo SPC
-        response_server = self.server.protocol_handler(protocol_msg, json_data)
+        protocol_msg = data_cliente["flag_protocol"] # -> Menssagem para o protocolo SPC
+        response_server = self.server.protocol_handler(protocol_msg, data_cliente)
 
         if "data" in response_server:
             response_server["data"] = response_server["data"].dict_user()
@@ -40,18 +44,11 @@ class Http_class(SimpleHTTPRequestHandler):
         self.wfile.write(json.dumps(response_server).encode('utf-8'))
     
     def do_GET(self):
-        # Tratamento do protocolo no servidor para o método GET
-        # protocol_msg = "GET"
-        # response_data = self.server.protocol_handler(protocol_msg, None)
-
-        # Transforma os dados em JSON
-        response_data = {"teste": "Deu bom"}
+        # Tratamento do protocolo no servidor HTTP para o método GET.
+        response_data = {"Status": "Online"}
         response_json = json.dumps(response_data)
-        
-        # Configura os cabeçalhos da resposta
         self._set_headers(content_type='application/json')
 
-        # Envia os dados para o navegador
         self.wfile.write(response_json.encode('utf-8'))
         print('Resposta enviada no método GET')
 
@@ -61,15 +58,13 @@ class CustomHTTPServer(ThreadingHTTPServer):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((HOST, PORT_TCP))
 
-    def protocol_handler(self, msg, data):
+    def protocol_handler(self, msg, data_cliente):
         self.client_socket.send(pickle.dumps(msg))
-        data_cliente = json.loads(data.decode('utf-8')) # -> Lendo os dados JSON 
-        print(data_cliente)
 
         hash_passwd = sha256(data_cliente["senha"].encode())
         # convertendo a senha de bytes para hexadecimal
         data_cliente["senha"] = hash_passwd.hexdigest()
-        
+                
         data_cliente = pickle.dumps(data_cliente) # -> Convertendo em dicionario pyhton
         self.client_socket.send(data_cliente) # -> Enviado para o sevidor SPC
 

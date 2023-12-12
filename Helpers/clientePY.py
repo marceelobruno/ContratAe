@@ -116,27 +116,26 @@ def entar(type, action):
                 dashboard(response_server["data"] ,type) # -> chamando a função principal do cliente
                 break
 
-
 def dashboard(user, type):
 
     if type == "c": # -> aqui ficará a área do candidato
+        if not user.perfil_completo():
+            print('Bem-vindo ao ContratAe!\n\nPara continuar é necessário que preencha as demais informações do perfil.')
 
-        print('Bem-vindo ao ContratAe!\n\nPara continuar é necessário que preencha as demais informações do perfil.')
+            cand_area = input('Área de atuação: ')
+            listSkills = []
+            while True:
+                cand_skills = input('Digite suas competências, 1 por vez (Digite "." para encerrar): ')
+                if cand_skills == '.':
+                    break
+                listSkills.append(cand_skills)
 
-        cand_area = input('Área de atuação: ')
-        listSkills = []
-        while True:
-            cand_skills = input('Digite suas competências, 1 por vez (Digite "." para encerrar)')
-            if cand_skills == '.':
-                break
-            listSkills.append(cand_skills)
+            cand_descricao = input('Digite uma breve descrição ( até 140 caracteres ): ')
+            cand_cidade = input('Informe sua cidade: ')
+            cand_uf = input('Informe seu estado: ')
 
-        cand_descricao = input('Digite uma breve descrição ( até 140 caracteres ): ')
-        cand_cidade = input('Informe sua cidade: ')
-        cand_uf = input('Informe seu estado: ')
-
-        user.criar_perfil(listSkills, cand_area, cand_descricao, cand_cidade, cand_uf) 
-        print(user)
+            user.criar_perfil(listSkills, cand_area, cand_descricao, cand_cidade, cand_uf) 
+            print(user)
 
         while True:
             while True:
@@ -175,9 +174,6 @@ def dashboard(user, type):
                 protocol_msg = 'GET'
                 action = 'verPerfil'
 
-            
-
-
             cliente_socket.send(pickle.dumps(protocol_msg))
             data_cliente = {'action': action, 'type': 'c', 'idVaga': idVaga, 'cpf': user.cpf }
             cliente_socket.send(pickle.dumps(data_cliente))
@@ -205,7 +201,34 @@ def dashboard(user, type):
 
 
     elif type == 'r':
-        pass
+        logger.info(user)
+        print()
+        print('Bem-vindo ao ContratAe!')
+        print("----------------------")
+        protocol_msg = "POST"
+        cliente_socket.send(pickle.dumps(protocol_msg))
+        print("Crie sua primeira vaga")
+        print("----------------------")
+        dict_vaga = {}
+        dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
+        dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
+        dict_vaga["descricao_vaga"] = input("Digite uma breve descrição: ")
+        dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
+        dict_vaga["salario_vaga"] = input("Digite o salário: ")
+        dict_vaga["requisitos"] = []
+        while True:
+            resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
+            if resquisito_vaga == '.':
+                break
+            dict_vaga["requisitos"].append(resquisito_vaga)
         
+        data_cliente = {'action': "criar_vaga", 'type': 'r', 'cpf': user.cpf }
+        cliente_socket.send(pickle.dumps(data_cliente))
+        cliente_socket.send(pickle.dumps(dict_vaga))
+        
+        response_server = cliente_socket.recv(1024)
+        response_server = pickle.loads(response_server)
+        logger.info(response_server["message"])
+        cliente_socket.close()
 
 run_cliente()

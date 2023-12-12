@@ -117,6 +117,12 @@ class Candidato:
         self.__descricao = descricao
         self.__cidade = cidade
         self.__uf = uf
+        
+    def perfil_completo(self):
+        if self.__skills and self.__area and self.__descricao:
+            return True
+        else:
+            return False
     
     def dict_user(self):
         user_dict = {
@@ -137,14 +143,13 @@ class Candidato:
         Nome: {self.__nome}                         
         CPF: {self.__cpf}
         Email: {self.__email}
-        Senha: {self.__senha}
         Skills: {self.__skills}
         Area: {self.__area}
         Descricao: {self.__descricao}
         Cidade: {self.__cidade}
-        Uf: {self.__uf}
-        Skills: {self.__skills}
-"""
+        Uf: {self.__uf} 
+""" 
+    
 
 
 if __name__ == "__main__":
