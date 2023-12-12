@@ -80,4 +80,5 @@ def run(server_class=CustomHTTPServer, handler_class=Http_class, porta_http=8000
     # print(f'Servidor TCP conectado à porta {porta_tcp}')
     httpd.serve_forever()
 
+
 run()
