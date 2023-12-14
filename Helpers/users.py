@@ -92,7 +92,7 @@ class Candidato:
 
 
     def candidatar(self, vaga: Vaga):#<-----em análise
-        self.__vagas_aplicadas.inserir(vaga)
+        self.__vagas_aplicadas.append(vaga)
     
     def ver_candidaturas(self)->None:
         """Mostra as candidaturas efetuadas pelo candidato.

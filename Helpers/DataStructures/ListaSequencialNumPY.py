@@ -148,6 +148,23 @@ class Lista:
             
         raise ListaException(f'A chave {chave} não está armazenado na lista')
 
+    def append(self, carga: any):
+        '''
+        Adiciona um elemento ao final da lista.
+        Parâmetros:
+            carga(any): a carga do elemento a ser adicionado
+        '''
+        novoNo = Node(carga)
+        if self.estaVazia():
+            self.__head = novoNo
+        else:
+            cursor = self.__head
+            while cursor.next is not None:
+                cursor = cursor.next
+
+            cursor.next = novoNo
+        self.__tamanho += 1
+    
     def inserir(self, carga:any ):
         '''
         Insere um elemento na lista de forma ordenada.
@@ -243,3 +260,11 @@ class Lista:
             carga = self.__ponteiro.data
             self.__ponteiro = self.__ponteiro.next
             return carga
+
+
+if __name__ == "__main__":
+    l = Lista()
+    l.append(1)
+    l.append(12)
+    l.append(13)
+    print(l)

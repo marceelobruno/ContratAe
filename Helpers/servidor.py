@@ -210,7 +210,7 @@ def protocol(protocol_msg, cliente):
                     user_recrutador = TableRecrutadores[data_cliente["cpf"]]
                     vaga_info = pickle.loads(cliente.recv(1024))
                     
-                    ListaVagas.inserir(user_recrutador.criar_vaga(vaga_info["nome_vaga"],
+                    ListaVagas.append(user_recrutador.criar_vaga(vaga_info["nome_vaga"],
                           vaga_info["area_vaga"],
                           vaga_info["descricao_vaga"],
                           vaga_info["quant_candidaturas"],
@@ -250,11 +250,11 @@ def protocol(protocol_msg, cliente):
                                 cliente.send(pickle.dumps(protocol_response))
                                 handle_client(cliente)
                                 break
-                        else:
-                            protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
-                            cliente.send(pickle.dumps(protocol_response))
-                            handle_client(cliente)
-                            break
+                        
+                        protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+                        cliente.send(pickle.dumps(protocol_response))
+                        handle_client(cliente)
+                        break
 
     elif protocol_msg == "UNAPPLY":
         while True:
@@ -281,6 +281,10 @@ def protocol(protocol_msg, cliente):
                             cliente.send(pickle.dumps(protocol_response))
                             handle_client(cliente)
                             break
+                    protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+                    cliente.send(pickle.dumps(protocol_response))
+                    handle_client(cliente)
+                    break
                         
 def run_server():
     while True:

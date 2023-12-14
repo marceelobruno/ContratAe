@@ -24,7 +24,7 @@ class Vaga:
         return self.__lista_candidaturas
     
     def adicionarCandidatura(self,candidato):
-        self.__lista_candidaturas.inserir(candidato)
+        self.__lista_candidaturas.append(candidato)
         self.__quantidade -=1
     
     def removerCandidatura(self,key):

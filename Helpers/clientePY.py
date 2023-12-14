@@ -196,7 +196,7 @@ def dashboard(user, type):
                         for i in response_server['data']:
                             print(i)
 
-                elif action == 'candidatar' or action == 'cancelarCand':
+                elif action == 'candidatar':
 
                     response_server = cliente_socket.recv(1024)
                     response_server = pickle.loads(response_server) # -> resposta do 
@@ -205,6 +205,17 @@ def dashboard(user, type):
                         logger.info(response_server['message'])
                     else:
                         logger.error(response_server['message'])
+
+                elif action == 'cancelarCand':
+                    
+                    response_server = cliente_socket.recv(1024)
+                    response_server = pickle.loads(response_server) # -> resposta do 
+                    
+                    if response_server['status'] == "200 OK":
+                        logger.info(response_server['message'])
+                    else:
+                        logger.error(response_server['message'])
+
                     
                 elif action == 'verCandidaturas':
 
