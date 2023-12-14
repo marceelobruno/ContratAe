@@ -1,7 +1,6 @@
 """
 Classes de Conexão e CRUD para Supabase
 """
-
 import os
 
 from dotenv import load_dotenv
@@ -13,11 +12,9 @@ load_dotenv()
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 
-
 def supabase_conn(url, key):
     conn: Client = create_client(url, key)
     return conn
-
 
 class CandidatoDB:
     """Desc Candidato"""
