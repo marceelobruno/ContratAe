@@ -196,9 +196,15 @@ def protocol(protocol_msg, cliente):
                             data_cliente["senha"],
                             data_cliente["cpf"],
                         )
-                        
+
                         protocol_response = {"status": '201 Created', "data": TableRecrutadores[data_cliente["cpf"]]}
                         cliente.send(pickle.dumps(protocol_response))
+                        
+                        # Inserindo os dados do Recrutador no Banco de Dados
+                        recruiter = RecrutadorDB()
+                        recruiter.insert_recrutador(data_cliente["cpf"], data_cliente["nome"],
+                        data_cliente["nomeEmpresa"], data_cliente["email"], data_cliente["senha"])
+
                         handle_client(cliente)
                         break
                     else:
