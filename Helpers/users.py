@@ -17,13 +17,17 @@ class Recrutador:
     def cpf(self):
         return self.__cpf
     
+    @property 
+    def empresa(self):
+        return self.__nome_empresa
+    
     @property
     def senha(self):
         return self.__senha
     
     def criar_vaga(self, nome, area, descricao, quantidade, salario, requisitos):
         return Vaga(
-            nome, area, descricao, quantidade, self.__nome_empresa, salario, requisitos
+            nome, area, descricao, quantidade, empresa, salario, requisitos
         )
 
     def dict_user(self):
@@ -69,7 +73,7 @@ class Candidato:
         self.__descricao = descricao  # ""
         self.__cidade = cidade  # ""
         self.__uf = uf  # ""
-        self.__vagas_aplicadas = []
+        self.__vagas_aplicadas = Lista()
 
     @property
     def nome(self):
@@ -89,30 +93,25 @@ class Candidato:
 
 
     def candidatar(self, vaga: Vaga):#<-----em análise
-        return self.__vagas_aplicadas.append(vaga)
+        self.__vagas_aplicadas.append(vaga)
     
     def ver_candidaturas(self)->None:
         """Mostra as candidaturas efetuadas pelo candidato.
         """
-        return self.__vagas_aplicadas
-            
-    
-    def cancelar_candidatura(self,key:str) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
+        return self.vagas_aplicadas
+
+    def cancelar_candidatura(self,key:int) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
         """Remove a vaga especifíca da lista de vagas aplicadas. 
 
         Args:
-            key (str): Atributo nome do objeto Vaga. 
+            key (int): Posição do objeto Vaga. 
 
         Returns:
             None
         """
-        for i in range(len(self.__vagas_aplicadas)):
-            if self.__vagas_aplicadas[i].nome == key:
-                posicao = i
-                break
-        self.__vagas_aplicadas.pop(posicao)
+        self.vagas_aplicadas.remover(key)
     
-    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):#<-----em análise
+    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):
         self.__skills = skills
         self.__area = area
         self.__descricao = descricao
@@ -141,6 +140,8 @@ class Candidato:
 
     def __str__(self) -> str:  # <---------Opção Ver perfil do menu do cliente.
         return f"""
+
+        
         Nome: {self.__nome}                         
         CPF: {self.__cpf}
         Email: {self.__email}

@@ -91,6 +91,37 @@ class CandidatoDB:
         # Retorna a senha em str
         return data[1][0]["senha"]
 
+    def get_candidaturas(self, cpf: int) -> list:
+        """Retorna todas as candidaturas de determinado Candidato da tabela Candidaturas"""
+        data, count = (
+            supabase_conn(url, key)
+            .table("candidaturas")
+            .select("id_candidato, vaga(*)")
+            .eq("id_candidato", f"{cpf}")
+            .execute()
+        )
+        logger.info(f"Retornando todas candidaturas do candidato: {cpf}")
+        # Retorna todos as candidaturas de determinado candidato
+        return data[1]
+
+    def candidatar_se(self, cpf: str, id_vaga: int):
+        """Método que insere uma nova candidatura realizada por um candidato
+        para o banco de dados na tabela Candidaturas."""
+        data = (
+            supabase_conn(url, key)
+            .table("candidaturas")
+            .insert(
+                {
+                    "id_candidato": f"{cpf}",
+                    "id_vaga": f"{id_vaga}",
+                }
+            )
+            .execute()
+        )
+        assert len(data.data) > 0
+        logger.info(f"Candidato: {cpf} inscreveu-se na vaga: {id_vaga}")
+
+
 
 class RecrutadorDB:
     """Desc Recrutador"""
@@ -273,4 +304,4 @@ if __name__ == "__main__":
     # )
     # vaga.delete_vaga(30844)
     # print('VAGAS:\n', vaga.get_all_vagas())
-    print(vaga.get_vagas_recrutador('99966633311'))
+    # print(vaga.get_vagas_recrutador('99966633311'))

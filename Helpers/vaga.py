@@ -11,7 +11,7 @@ class Vaga:
         self.__nome_empresa = nome_empresa
         self.__salario = salario
         self.__requisitos = requisitos
-        self.__lista_candidaturas = []  # lista do professor vulgo Alex
+        self.__lista_candidaturas = Lista()  # lista do professor vulgo Alex
     
     @property
     def nome(self):
@@ -19,16 +19,26 @@ class Vaga:
     @property
     def id(self):
         return self.__id
+    @property
+    def lista_candidaturas(self):
+        return self.__lista_candidaturas
     
     def adicionarCandidatura(self,candidato):
-        self.__lista_candidaturas.append(candidato.cpf)
-        self.__limite -=1
+        self.__lista_candidaturas.append(candidato)
+        self.__quantidade -=1
+    
+    def removerCandidatura(self,key):
+        self.__lista_candidaturas.remover(key)
+
+    def gerarID(self):
+        self.__id = random.randint(1,9999)
+
 
     def mostrarCandidaturas(self):
         return self.__lista_candidaturas
     
     def vagaEstaCheia(self):
-        return self.__lista_candidaturas.estaCheia()
+        return self.__quantidade == 0
     
     def dict_vaga(self):
         vaga_dict =  {
@@ -42,7 +52,7 @@ class Vaga:
             "lista_candidaturas": self.__lista_candidaturas
         }
 
-        return vaga_dict
+        
     
     def __str__(self) -> str:
         return f"""
@@ -59,14 +69,17 @@ class Vaga:
 ------------------------------------
 """
     
-# if __name__ == '__main__':
-#     v = Vaga('tsi','ti','adf','fsr','hsdfiuwshgf','fhwiufhw', 'hhdsgf')
-#     c = Candidato('luiz','lf','1234')
-#     d = Candidato('lucas','lf','1234')
-#     e = Candidato('marcelo','lf','1234')
-#     f = Candidato('bruno','lf','1234')
-#     v.adicionarCandidatura(c)
-#     v.adicionarCandidatura(d)
-#     v.adicionarCandidatura(e)
-#     v.adicionarCandidatura(f)
-#     print(v.mostrarCandidaturas())
+if __name__ == '__main__':
+    v = Vaga('tsi','ti','adf',10,'hsdfiuwshgf','fhwiufhw', 'hhdsgf')
+    # c = Candidato('luiz','lf','1234')
+    # d = Candidato('lucas','lf','1234')
+    # e = Candidato('marcelo','lf','1234')
+    # f = Candidato('bruno','lf','1234')
+    # v.adicionarCandidatura(c)
+    # v.adicionarCandidatura(d)
+    # v.adicionarCandidatura(e)
+    # v.adicionarCandidatura(f)
+    # print(v.mostrarCandidaturas())
+    print(v)
+    v.gerarID()
+    print(v)
