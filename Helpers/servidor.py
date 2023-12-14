@@ -24,6 +24,7 @@ server.listen()
 TableCandidatos = ChainingHashTable()
 TableRecrutadores = ChainingHashTable()
 ListaVagas = Lista()
+mutex = threading.Semaphore(1)
 
 
 def get_candidatos_from_supabase() -> None:
@@ -77,14 +78,9 @@ def get_recrutadores_from_db() -> None:
 
 def handle_client(cliente):
 
-    # while True:
-        # print(cliente)
-        protocol_msg = cliente.recv(1024)
-        # protocol_msg = protocol_msg.decode('utf-8')
-        protocol_msg = pickle.loads(protocol_msg)
-        t2 = threading.Thread(target=protocol, args=(protocol_msg,cliente,))
-        t2.start()
-        # protocol(protocol_msg, cliente)
+    protocol_msg = cliente.recv(1024)
+    protocol_msg = pickle.loads(protocol_msg)
+    protocol(protocol_msg,cliente)
 
 def recrutador():
     pass
@@ -108,6 +104,7 @@ def protocol(protocol_msg, cliente):
         while True:
             print("entrei", protocol_msg)
             data_cliente = pickle.loads(cliente.recv(1024))
+            print(data_cliente)
         
             if data_cliente["type"] == "c":
                 if data_cliente['action'] == 'login':
@@ -124,6 +121,8 @@ def protocol(protocol_msg, cliente):
                         protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
                     
                     cliente.send(pickle.dumps(protocol_response))
+                    handle_client(cliente)
+                    break
 
                 elif data_cliente['action'] == 'verVagas':
                     if len(ListaVagas) == 0:
@@ -222,41 +221,42 @@ def protocol(protocol_msg, cliente):
                     break
 
     elif protocol_msg == 'APPLY':
+        mutex.acquire()
         while True:
             print("entrei", protocol_msg)
             data_cliente = cliente.recv(1024) 
             data_cliente = pickle.loads(data_cliente)
             print(data_cliente)
 
-            if data_cliente['type'] == "c":
-                logger.info('entrei')
-                if data_cliente['action'] == 'candidatar':
-                    idVaga = data_cliente['idVaga']
-                    for vaga in ListaVagas:
-                        if vaga.id == idVaga:
-                            if vaga.vagaEstaCheia():
-                                protocol_response = {"status": "400 Bad Request", "message":'Limite de candidaturas alcançados.'}
-                                cliente.send(pickle.dumps(protocol_response))
-                                handle_client(cliente)
-                                break
-                            else:
-                                cand = TableCandidatos[data_cliente["cpf"]]
-                                cand.candidatar(vaga)
-                                vaga.adicionarCandidatura(cand)
-                                #SEMAFORO
-                                protocol_response = {"status": "200 OK","message": 'Candidatura registrada com sucesso!'}
-                                logger.info(protocol_response["message"])
-                                print(cand.vagas_aplicadas)
-                                cliente.send(pickle.dumps(protocol_response))
-                                handle_client(cliente)
-                                break
-                        
-                        protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+            logger.info('entrei')
+
+            idVaga = data_cliente['idVaga']
+            for vaga in ListaVagas:
+                if vaga.id == idVaga:
+                    if vaga.vagaEstaCheia():
+                        protocol_response = {"status": "400 Bad Request", "message":'Limite de candidaturas alcançados.'}
                         cliente.send(pickle.dumps(protocol_response))
                         handle_client(cliente)
                         break
+                    else:
+                        cand = TableCandidatos[data_cliente["cpf"]]
+                        cand.candidatar(vaga)
+                        vaga.adicionarCandidatura(cand)
+                        protocol_response = {"status": "200 OK","message": 'Candidatura registrada com sucesso!'}
+                        logger.info(protocol_response["message"])
+                        print(cand.vagas_aplicadas)
+                        cliente.send(pickle.dumps(protocol_response))
+                        handle_client(cliente)
+                        break
+                
+            protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+            cliente.send(pickle.dumps(protocol_response))
+            mutex.release()
+            handle_client(cliente)
+            break
 
     elif protocol_msg == "UNAPPLY":
+        mutex.acquire()
         while True:
             print("entrei", protocol_msg)
             data_cliente = cliente.recv(1024) 
@@ -283,6 +283,7 @@ def protocol(protocol_msg, cliente):
                             break
                     protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
                     cliente.send(pickle.dumps(protocol_response))
+                    mutex.release()
                     handle_client(cliente)
                     break
                         

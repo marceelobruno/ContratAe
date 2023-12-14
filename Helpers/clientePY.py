@@ -55,11 +55,13 @@ def entar(type, action):
     
     if action == "login":
         # -> verificar se o usuário existe
-        protocol_msg = "GET"
+        
         # cliente_socket.send(protocol_msg.encode('utf-8'))
-        cliente_socket.send(pickle.dumps(protocol_msg))
         
         while True:
+            protocol_msg = "GET"
+            cliente_socket.send(pickle.dumps(protocol_msg))
+
             data_cliente = {}
             data_cliente["type"] = type
             data_cliente['action'] = 'login'
@@ -143,7 +145,7 @@ def dashboard(user, type):
                     print()
                     entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Cancelar candidatura\n4-Ver perfil\n5-Ver candidaturas\n\n')
                     print()
-                    assert entrada in ['1','2','3','4','5'], 'Escolha uma opções acima.'
+                    assert entrada in ['1','2','3','4','5'], 'Escolha uma das opções acima.'
                     break
                 except AssertionError as ae:
                     print(ae)
@@ -173,6 +175,7 @@ def dashboard(user, type):
                         print('Digite um número inteiro referente a vaga em questão.')                
 
             elif entrada == '4':
+                print('Este é o seu perfil\n\n')
                 print(user)
 
             elif entrada == '5':
