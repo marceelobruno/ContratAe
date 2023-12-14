@@ -82,8 +82,12 @@ def handle_client(cliente):
     protocol_msg = pickle.loads(protocol_msg)
     protocol(protocol_msg,cliente)
 
-def recrutador():
-    pass
+def recrutador(data_cliente):
+    user_recrutador = TableRecrutadores[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
+    if user_recrutador:
+        return user_recrutador # -> enviando a referencia do objeto para o cliente
+    else:
+        return None
 
 def candidato(data_cliente):
     user_candidato = TableCandidatos[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
@@ -150,7 +154,21 @@ def protocol(protocol_msg, cliente):
                         break
 
             elif data_cliente["type"] == "r":
-                pass
+                
+                if data_cliente['action'] == 'login':
+                    user_recrutador = recrutador(data_cliente)
+                    if user_recrutador:
+                        if user_recrutador.senha == data_cliente["senha"]:
+                            protocol_response = {"status": "200 Ok", "data": user_recrutador}
+                            cliente.send(pickle.dumps(protocol_response))
+                            handle_client(cliente)
+                            break
+                        else:
+                            protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
+                    else:
+                        protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
+                    
+                    cliente.send(pickle.dumps(protocol_response))
             
     elif protocol_msg == 'POST':
         while True:
