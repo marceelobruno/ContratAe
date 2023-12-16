@@ -219,7 +219,6 @@ def dashboard(cpf,type):
                     print(ae)
 
             content_dash = {}
-            # idVaga = ''
             
             if entrada == '1':
                 protocol_msg = 'verVagas'
@@ -316,6 +315,7 @@ def dashboard(cpf,type):
             dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
             dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
             dict_vaga["descricao_vaga"] = input("Digite uma breve descrição: ")
+            
             while True:
                 try:
                     dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))

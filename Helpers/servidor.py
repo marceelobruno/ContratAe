@@ -106,12 +106,22 @@ def candidato(data_cliente):
 def formatar_lista(lista):
     liste = []
     for i in lista:
-        liste.append(i.dict_vaga())
+        liste.append(i.dict_vagaMOD())
         # print(i.dict_vaga())
         # print(type(i.dict_vaga()))
     return liste
 
-     
+def procurar_vaga(lista, idVaga):
+    try:
+       for vaga in lista:
+            if vaga['id'] == idVaga:
+                return vaga
+    except:
+        for vaga in lista:
+            if vaga.id == idVaga:
+               return vaga
+        
+          
 
 def protocol(cliente, data_cliente):
     """
@@ -330,14 +340,17 @@ def protocol(cliente, data_cliente):
 
             logger.info(lista_candi)
 
-            for vaga in lista_candi:
-                if vaga['id'] == idVaga:
-                    vaga['lista_candidaturas'].remove(candi.dict_user()) 
-                    candi.cancelar_candidatura(vaga)                        
+            info_vaga =  procurar_vaga(lista_candi, idVaga)
+            info_vaga['lista_candidaturas'].remove(candi.dict_user())
 
-                    protocol_response = {'status':"200 OK", 'message': 'Cancelamento efetuado com sucesso.'}
-                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
-                    handle_client(cliente)
+            candi.cancelar_candidatura(info_vaga)
+
+            info_vaga2 = procurar_vaga(ListaVagas, idVaga)
+            info_vaga2.aumentar_quantidade()
+
+            protocol_response = {'status':"200 OK", 'message': 'Cancelamento efetuado com sucesso.'}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            handle_client(cliente)
 
             protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
             cliente.send(json.dumps(protocol_response).encode('utf-8'))

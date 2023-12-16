@@ -23,6 +23,15 @@ class Vaga:
     def lista_candidaturas(self):
         return self.__lista_candidaturas
     
+    @property
+    def quantidade(self):
+        return self.__quantidade
+    
+    # @quantidade.setter
+    # def quantidade(self,value):
+    #     self.quantidade += value
+
+    
     def adicionarCandidatura(self,candidato):
         self.__lista_candidaturas.append(candidato)
         self.__quantidade -=1
@@ -33,6 +42,9 @@ class Vaga:
 
     def gerarID(self):
         self.__id = random.randint(1,9999)
+
+    def aumentar_quantidade(self):
+        self.__quantidade +=1
 
 
     def mostrarCandidaturas(self):
@@ -52,6 +64,19 @@ class Vaga:
             "salario": self.__salario,
             "requisitos": self.__requisitos,
             "lista_candidaturas": self.__lista_candidaturas
+        }
+        return vaga_dict
+    
+    def dict_vagaMOD(self):
+        vaga_dict =  {
+            "nome": self.__nome,
+            "area": self.__area,
+            "id": self.__id,
+            "descricao": self.__descricao,
+            "quantidade": self.__quantidade,
+            "nome_empresa": self.__nome_empresa,
+            "salario": self.__salario,
+            "requisitos": self.__requisitos,
         }
         return vaga_dict
         

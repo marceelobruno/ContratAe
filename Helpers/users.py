@@ -104,7 +104,7 @@ class Candidato:
         """Remove a vaga especifíca da lista de vagas aplicadas. 
 
         Args:
-            key (int): Posição do objeto Vaga. 
+            key (any): Posição do objeto Vaga. 
 
         Returns:
             None
