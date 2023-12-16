@@ -1,6 +1,7 @@
 from DataStructures.ListaSequencialNumPY import Lista
 from vaga import Vaga
 
+
 class Recrutador:
     def __init__(self, nome: str, email: str, senha: str, cpf: str, nome_empresa = None):
         self.__nome = nome
@@ -17,15 +18,11 @@ class Recrutador:
     def cpf(self):
         return self.__cpf
     
-    @property 
+    @property
     def empresa(self):
         return self.__nome_empresa
     
-    @property
-    def senha(self):
-        return self.__senha
-    
-    def criar_vaga(self, nome, area, descricao, quantidade, salario, requisitos):
+    def criar_vaga(self, nome, area, descricao, quantidade, empresa, salario, requisitos):
         return Vaga(
             nome, area, descricao, quantidade, empresa, salario, requisitos
         )
@@ -45,11 +42,14 @@ class Recrutador:
 
     def __str__(self) -> str:  # <---------Opção Ver perfil do menu do cliente.
         return f"""
-        Nome: {self.__nome}                         CPF: {self.__cpf}
+        Nome: {self.__nome}                         
+        CPF: {self.__cpf}
         Email: {self.__email}
         Empresa: {self.__nome_empresa}
         Senha: {self.__senha}
 """
+
+
 class Candidato:
     def __init__(
         self,
@@ -73,7 +73,7 @@ class Candidato:
         self.__descricao = descricao  # ""
         self.__cidade = cidade  # ""
         self.__uf = uf  # ""
-        self.__vagas_aplicadas = Lista()
+        self.__vagas_aplicadas = []
 
     @property
     def nome(self):
@@ -93,7 +93,7 @@ class Candidato:
 
 
     def candidatar(self, vaga: Vaga):#<-----em análise
-        self.__vagas_aplicadas.append(vaga)
+        self.__vagas_aplicadas.append(vaga.dict_vaga())
     
     def ver_candidaturas(self)->None:
         """Mostra as candidaturas efetuadas pelo candidato.
@@ -109,7 +109,7 @@ class Candidato:
         Returns:
             None
         """
-        self.vagas_aplicadas.remover(key)
+        self.vagas_aplicadas.pop(key)
     
     def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):
         self.__skills = skills
@@ -119,7 +119,7 @@ class Candidato:
         self.__uf = uf
         
     def perfil_completo(self):
-        if self.__skills and self.__area and self.__descricao:
+        if self.__skills != None and self.__area != None and self.__descricao != None:
             return True
         else:
             return False

@@ -11,7 +11,7 @@ class Vaga:
         self.__nome_empresa = nome_empresa
         self.__salario = salario
         self.__requisitos = requisitos
-        self.__lista_candidaturas = Lista()  # lista do professor vulgo Alex
+        self.__lista_candidaturas = []  # lista do professor vulgo Alex
     
     @property
     def nome(self):
@@ -28,7 +28,8 @@ class Vaga:
         self.__quantidade -=1
     
     def removerCandidatura(self,key):
-        self.__lista_candidaturas.remover(key)
+        self.__lista_candidaturas.pop(key)
+        self.__quantidade +=1
 
     def gerarID(self):
         self.__id = random.randint(1,9999)
@@ -44,6 +45,7 @@ class Vaga:
         vaga_dict =  {
             "nome": self.__nome,
             "area": self.__area,
+            "id": self.__id,
             "descricao": self.__descricao,
             "quantidade": self.__quantidade,
             "nome_empresa": self.__nome_empresa,
@@ -51,7 +53,7 @@ class Vaga:
             "requisitos": self.__requisitos,
             "lista_candidaturas": self.__lista_candidaturas
         }
-
+        return vaga_dict
         
     
     def __str__(self) -> str:

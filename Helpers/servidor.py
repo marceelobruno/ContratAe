@@ -1,9 +1,10 @@
 """
 Servidor - Protocolo SPC (Securitas Protocol ContratAe)
 """
-import pickle
+import json
 import socket
 import threading
+import json
 
 from DataStructures.ChainingHashTable import ChainingHashTable
 from DataStructures.ListaSequencialNumPY import Lista
@@ -21,6 +22,7 @@ print("=== Servidor ===\n")
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen()
+
 TableCandidatos = ChainingHashTable()
 TableRecrutadores = ChainingHashTable()
 ListaVagas = Lista()
@@ -78,9 +80,14 @@ def get_recrutadores_from_db() -> None:
 
 def handle_client(cliente):
 
-    protocol_msg = cliente.recv(1024)
-    protocol_msg = pickle.loads(protocol_msg)
-    protocol(protocol_msg,cliente)
+    data_recv = cliente.recv(1024)
+    # print(data_recv)
+    data_recv_decoded = json.loads(data_recv.decode('utf-8'))
+    # print(data_recv_decoded)
+    data_cliente =  data_recv_decoded
+
+
+    protocol(cliente,data_cliente)
 
 def recrutador(data_cliente):
     user_recrutador = TableRecrutadores[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
@@ -96,7 +103,17 @@ def candidato(data_cliente):
     else:
         return None
 
-def protocol(protocol_msg, cliente):
+def formatar_lista(lista):
+    liste = []
+    for i in lista:
+        liste.append(i.dict_vaga())
+        # print(i.dict_vaga())
+        # print(type(i.dict_vaga()))
+    return liste
+
+     
+
+def protocol(cliente, data_cliente):
     """
     GET -> Pegar informações de candidaturas, informações de vagas e lista de candidatos (caso Recrutador).
     POST -> Postar informações como vaga, novo usuário ou recrutador.
@@ -104,212 +121,253 @@ def protocol(protocol_msg, cliente):
     APPLY -> Referente ao usuário candidatar-se a uma vaga.
     UNAPPLY -> Retira a candidatura de uma vaga.
     """
-    if protocol_msg == 'GET':
-        while True:
-            print("entrei", protocol_msg)
-            data_cliente = pickle.loads(cliente.recv(1024))
+    if data_cliente["protocol_msg"] == 'LOGIN':
+
+            #PARÂMETROS DE LOGIN ===> [protocol_msg, type, cpf, senha]
+            print("entrei", data_cliente["protocol_msg"])
             print(data_cliente)
         
             if data_cliente["type"] == "c":
-                if data_cliente['action'] == 'login':
                     user_candidato = candidato(data_cliente)
                     if user_candidato:
                         if user_candidato.senha == data_cliente["senha"]:
-                            protocol_response = {"status": "200 Ok", "data": user_candidato}
-                            cliente.send(pickle.dumps(protocol_response))
+                            protocol_response = {'status':'200 OK', 'message': 'Usuario autenticado.', 'data': data_cliente['cpf']}
+
+                            data_send = json.dumps(protocol_response).encode('utf-8')
+                            cliente.send(data_send)
                             handle_client(cliente)
-                            break
+                            
                         else:
                             protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
                     else:
-                        protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
+                        protocol_response = {"status": "404 Not Found", "message": "Usuario não encontrado !"}
                     
-                    cliente.send(pickle.dumps(protocol_response))
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     handle_client(cliente)
-                    break
+                    
 
-                elif data_cliente['action'] == 'verVagas':
-                    if len(ListaVagas) == 0:
-                        protocol_response = {"status": "404 Not Found", "message": 'Não há vagas...'}
-                        cliente.send(pickle.dumps(protocol_response))
-                        handle_client(cliente)
-                        break
-                    else:
-                        protocol_response = {"status": "200 OK", "data": ListaVagas}
-                        cliente.send(pickle.dumps(protocol_response))
-                        handle_client(cliente)
-                        break
+    elif data_cliente['protocol_msg'] == 'verVagas':
+                    
+        if len(ListaVagas) == 0:
+            protocol_response = {"status": "404 Not Found", "message": 'Não há vagas...'}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            handle_client(cliente)
+            
+        else:
+            # vagasClient = []
+            # for i in ListaVagas:
+            #      vagasClient.append(i.dict_vaga())
+
+            # print(vagasClient)
+
+            lista_formatada = formatar_lista(ListaVagas)
+            protocol_response = {"status": "200 OK", "data": lista_formatada}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            handle_client(cliente)
+                        
                 
-                elif data_cliente['action'] == 'verCandidaturas':
+    elif data_cliente['protocol_msg'] == 'verCandidaturas':
+                    
                     vagasCandidato = TableCandidatos[data_cliente["cpf"]].vagas_aplicadas
+
                     if len(vagasCandidato) == 0:
                         protocol_response = {"status":"404 Not Found", "message":"Não há candidaturas."}
-                        cliente.send(pickle.dumps(protocol_response))
+                        cliente.send(json.dumps(protocol_response).encode('utf-8'))
                         handle_client(cliente)
-                        break
                     else: 
                         protocol_response = {"status":"200 OK", "data": vagasCandidato }
-                        cliente.send(pickle.dumps(protocol_response))
+                        cliente.send(json.dumps(protocol_response).encode('utf-8'))
                         handle_client(cliente)
-                        break
 
-            elif data_cliente["type"] == "r":
+
+    elif data_cliente['protocol_msg'] == 'verPerfil':
+
+        usuario = TableCandidatos[data_cliente["cpf"]]
+        usuario_info = usuario.dict_user()
+        protocol_response = {"status":"200 OK", "data": usuario_info }
+
+        data_send = json.dumps(protocol_response).encode('utf-8')
+        cliente.send(data_send)
+        handle_client(cliente)
+
+
+    # elif data_cliente["type"] == "r":
                 
-                if data_cliente['action'] == 'login':
-                    user_recrutador = recrutador(data_cliente)
-                    if user_recrutador:
-                        if user_recrutador.senha == data_cliente["senha"]:
-                            protocol_response = {"status": "200 Ok", "data": user_recrutador}
-                            cliente.send(pickle.dumps(protocol_response))
-                            handle_client(cliente)
-                            break
-                        else:
-                            protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
-                    else:
-                        protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
+    # if data_cliente['action'] == 'login':
+    #                 user_recrutador = recrutador(data_cliente)
+    #                 if user_recrutador:
+    #                     if user_recrutador.senha == data_cliente["senha"]:
+    #                         protocol_response = {"status": "200 Ok", "data": user_recrutador}
+    #                         cliente.send(json.dumps(protocol_response))
+    #                         handle_client(cliente)
+    #                     else:
+    #                         protocol_response = {"status": "401 Unauthorized", "message": "Senha inválida !"}
+    #                 else:
+    #                     protocol_response = {"status": "404 Not Found", "message": "Usuário não encontrado !"}
                     
-                    cliente.send(pickle.dumps(protocol_response))
+    #                 cliente.send(json.dumps(protocol_response))
             
-    elif protocol_msg == 'POST':
-        while True:
-            print("entrei", protocol_msg)
-            data_cliente = cliente.recv(1024) # data_cliente -> dicionario envidado do cliente para o servidor com as informacoes de tipo e cada campo de acordo com o tipo
-            data_cliente = pickle.loads(data_cliente) # -> usando o pickle para decodificar o dicionario
-            
-            if data_cliente["type"] == "c":
+    elif data_cliente['protocol_msg'] == 'CRIAR':
+
+        
+        print("entrei", data_cliente['protocol_msg'])
+        
+        if data_cliente["type"] == "c":
+            if data_cliente["cpf"] not in TableCandidatos:
                 
-                if data_cliente['action'] == 'criar':
+                TableCandidatos[data_cliente["cpf"]] = Candidato(
+                    data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
+                
+                user_candidato = TableCandidatos[data_cliente["cpf"]]
+                logger.info(f'{user_candidato}')
+                protocol_response = {"status": '201 Created','message': 'Usuario criado.', "data": data_cliente['cpf']}
+                cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                
+                # Inserindo os dados do Candidato no Banco de Dados
+                candidate = CandidatoDB()
+                candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
+                data_cliente["email"], data_cliente["senha"])
+                
+                handle_client(cliente)
+
+            else:
+                protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
+                cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                handle_client(cliente)
                     
-                    if data_cliente["cpf"] not in TableCandidatos:
+        elif data_cliente["type"] == "r":
+            
+                if data_cliente["cpf"] not in TableRecrutadores:
+        
+                    TableRecrutadores[data_cliente["cpf"]] = Recrutador(
+                        data_cliente["nome"],
+                        data_cliente['email'],
+                        data_cliente["senha"],
+                        data_cliente["cpf"],
+                        data_cliente["empresa"]
+                    )
+
+                    protocol_response = {"status": '201 Created', "message": "Usuario criado.", 'data': data_cliente['cpf']}
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                    
+                    # Inserindo os dados do Recrutador no Banco de Dados
+                    recruiter = RecrutadorDB()
+                    recruiter.insert_recrutador(data_cliente["cpf"], data_cliente["nome"],
+                    data_cliente["empresa"], data_cliente["email"], data_cliente["senha"])
+                    handle_client(cliente)
+                else:
+                    protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                    handle_client(cliente)
                         
-                        TableCandidatos[data_cliente["cpf"]] = Candidato(
-                            data_cliente["nome"], data_cliente["email"], data_cliente["senha"], data_cliente["cpf"])
-                        
-                        user_candidato = TableCandidatos[data_cliente["cpf"]]
-                        logger.info(f'{user_candidato}')
-                        protocol_response = {"status": '201 Created', "data": user_candidato}
-                        cliente.send(pickle.dumps(protocol_response))
-                        
-                        # Inserindo os dados do Candidato no Banco de Dados
-                        candidate = CandidatoDB()
-                        candidate.insert_candidato(data_cliente["cpf"], data_cliente["nome"],
-                        data_cliente["email"], data_cliente["senha"])
-                        
+    elif data_cliente["protocol_msg"] == "criar_vaga":
+                    
+        user_recrutador = TableRecrutadores[data_cliente["cpf"]]
+        vaga_info = data_cliente['vaga_info']
+        
+        
+        ListaVagas.append(user_recrutador.criar_vaga(vaga_info["nome_vaga"],
+                vaga_info["area_vaga"],
+                vaga_info["descricao_vaga"],
+                vaga_info["quant_candidaturas"],
+                user_recrutador.empresa,
+                vaga_info["salario_vaga"], vaga_info["requisitos"]))
+        
+        protocol_response = {"status": '201 Created', "message": "Vaga criada !"}
+        cliente.send(json.dumps(protocol_response).encode('utf-8'))
+        handle_client(cliente)
+        
+
+    elif data_cliente['protocol_msg'] == 'candidatar':
+        # mutex.acquire()
+        print("entrei", data_cliente['protocol_msg'])
+        logger.info('entrei')
+
+        idVaga = data_cliente['idVaga']
+        cand = TableCandidatos[data_cliente["cpf"]].dict_user()
+
+        for vaga in ListaVagas:
+            if vaga.id == idVaga:
+                if vaga.vagaEstaCheia():
+                    protocol_response = {"status": "400 Bad Request", "message":'Limite de candidaturas alcançados.'}
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                    handle_client(cliente)
+                else:
+                    if cand in vaga.lista_candidaturas:
+                        protocol_response = {"status": "400 Bad Request", "message":'Você já se candidatou a essa vaga.'}
+                        cliente.send(json.dumps(protocol_response).encode('utf-8'))
                         handle_client(cliente)
-                        break
-
-                    else:
-                        protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
-                        cliente.send(pickle.dumps(protocol_response))
-                        
-            elif data_cliente["type"] == "r":
-                
-                if data_cliente['action'] == 'criar':
                     
-                    if data_cliente["cpf"] not in TableRecrutadores:
+                    cand = TableCandidatos[data_cliente["cpf"]]
+                    
+                    vaga.adicionarCandidatura(cand)
+                    cand.candidatar(vaga)
+
+
+                    protocol_response = {"status": "200 OK","message": 'Candidatura registrada com sucesso!'}
+                    logger.info(protocol_response["message"])
+                    print(cand.vagas_aplicadas)
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                    handle_client(cliente)
             
-                        TableRecrutadores[data_cliente["cpf"]] = Recrutador(
-                            data_cliente["nome"],
-                            data_cliente["nomeEmpresa"],
-                            data_cliente["senha"],
-                            data_cliente["cpf"],
-                        )
+        protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+        cliente.send(json.dumps(protocol_response).encode('utf-8'))
+        # mutex.release()
+        handle_client(cliente)
 
-                        protocol_response = {"status": '201 Created', "data": TableRecrutadores[data_cliente["cpf"]]}
-                        cliente.send(pickle.dumps(protocol_response))
-                        
-                        # Inserindo os dados do Recrutador no Banco de Dados
-                        recruiter = RecrutadorDB()
-                        recruiter.insert_recrutador(data_cliente["cpf"], data_cliente["nome"],
-                        data_cliente["nomeEmpresa"], data_cliente["email"], data_cliente["senha"])
-
-                        handle_client(cliente)
-                        break
-                    else:
-                        protocol_response = {"status": "400 Bad Request", "message": "CPF já cadastrado."}
-                        cliente.send(pickle.dumps(protocol_response))
-                        
-                elif data_cliente["action"] == "criar_vaga":
-                    user_recrutador = TableRecrutadores[data_cliente["cpf"]]
-                    vaga_info = pickle.loads(cliente.recv(1024))
-                    
-                    ListaVagas.append(user_recrutador.criar_vaga(vaga_info["nome_vaga"],
-                          vaga_info["area_vaga"],
-                          vaga_info["descricao_vaga"],
-                          vaga_info["quant_candidaturas"],
-                          data_cliente['empresa'],
-                          vaga_info["salario_vaga"], vaga_info["requisitos"]))
-                    
-                    protocol_response = {"status": '201 Created', "message": "Vaga criada !"}
-                    cliente.send(pickle.dumps(protocol_response))
-                    break
-
-    elif protocol_msg == 'APPLY':
-        mutex.acquire()
-        while True:
-            print("entrei", protocol_msg)
-            data_cliente = cliente.recv(1024) 
-            data_cliente = pickle.loads(data_cliente)
-            print(data_cliente)
+    elif data_cliente['protocol_msg'] == "cancelarCandidatura":
+        # mutex.acquire()
+            print("entrei", data_cliente['protocol_msg'])
 
             logger.info('entrei')
-
             idVaga = data_cliente['idVaga']
-            for vaga in ListaVagas:
+            candi = TableCandidatos[data_cliente["cpf"]].dict_user()
+            logger.info(candi.vagas_aplicadas)
+
+            for vaga in candi.vagas_aplicadas:
                 if vaga.id == idVaga:
-                    if vaga.vagaEstaCheia():
-                        protocol_response = {"status": "400 Bad Request", "message":'Limite de candidaturas alcançados.'}
-                        cliente.send(pickle.dumps(protocol_response))
-                        handle_client(cliente)
-                        break
-                    else:
-                        cand = TableCandidatos[data_cliente["cpf"]]
-                        cand.candidatar(vaga)
-                        vaga.adicionarCandidatura(cand)
-                        protocol_response = {"status": "200 OK","message": 'Candidatura registrada com sucesso!'}
-                        logger.info(protocol_response["message"])
-                        print(cand.vagas_aplicadas)
-                        cliente.send(pickle.dumps(protocol_response))
-                        handle_client(cliente)
-                        break
-                
-            protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
-            cliente.send(pickle.dumps(protocol_response))
-            mutex.release()
-            handle_client(cliente)
-            break
 
-    elif protocol_msg == "UNAPPLY":
-        mutex.acquire()
-        while True:
-            print("entrei", protocol_msg)
-            data_cliente = cliente.recv(1024) 
-            data_cliente = pickle.loads(data_cliente)
-            print(data_cliente)
+                    indice_remocao_cand = candi.vagas_aplicadas.index(vaga)
+                    candi.cancelar_candidatura(indice_remocao_cand)
 
-            if data_cliente['type'] == "c":
-                logger.info('entrei')
-                if data_cliente['action'] == 'cancelarCand':
-                    idVaga = data_cliente['idVaga']
-                    candi = TableCandidatos[data_cliente["cpf"]]
-                    logger.info(candi.vagas_aplicadas)
-                    for vaga in candi.vagas_aplicadas:
-                        if vaga.id == idVaga:
-                            indice_remocao_cand = candi.vagas_aplicadas.busca(vaga)
-                            candi.cancelar_candidatura(indice_remocao_cand)
+                    indice_remocao_vaga = vaga.lista_candidaturas.index(candi)
+                    vaga.removerCandidatura(indice_remocao_vaga)
 
-                            indice_remocao_vaga = vaga.lista_candidaturas.busca(candi)
-                            vaga.removerCandidatura(indice_remocao_vaga)
-
-                            protocol_response = {'status':"200 OK", 'message': 'Cancelamento efetuado com sucesso.'}
-                            cliente.send(pickle.dumps(protocol_response))
-                            handle_client(cliente)
-                            break
-                    protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
-                    cliente.send(pickle.dumps(protocol_response))
-                    mutex.release()
+                    protocol_response = {'status':"200 OK", 'message': 'Cancelamento efetuado com sucesso.'}
+                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     handle_client(cliente)
-                    break
+
+            protocol_response = {"status":"404 Not Found", "message":'Vaga não encontrada.'}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            # mutex.release()
+            handle_client(cliente)
+
+    elif data_cliente['protocol_msg'] == "VERIFICAR":
+         
+        usuario = TableCandidatos[data_cliente["cpf"]]
+
+        if usuario.perfil_completo():
+            data_send = {'status':'200 OK', 'message':'Seu perfil está completo.'}
+        else:
+            data_send = {'status':'406 Incomplete', 'message':'Seu perfil está incompleto.'}
+        cliente.send(json.dumps(data_send).encode('utf-8'))
+        handle_client(cliente)
+
+    
+    elif data_cliente['protocol_msg'] == "completarPerfil":
+         
+        usuario = TableCandidatos[data_cliente["cpf"]]
+
+        usuario.criar_perfil(data_cliente['skills'],data_cliente['area'],data_cliente['descricao'],data_cliente['cidade'],data_cliente['uf'])
+
+        print(usuario)
+        protocol_response = {'status':"201 Criado", 'message': 'Seu perfil completo.'}
+        cliente.send(json.dumps(protocol_response).encode('utf-8'))
+        handle_client(cliente)
+        
+
+
+            
                         
 def run_server():
     while True:
