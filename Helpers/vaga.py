@@ -2,7 +2,7 @@
 from DataStructures.ListaSequencialNumPY import Lista
 import random
 class Vaga:
-    def __init__(self, nome, area, descricao, quantidade:int, nome_empresa, salario, requisitos):
+    def __init__(self, nome, area, descricao, quantidade:int, nome_empresa, salario:float, requisitos):
         self.__nome = nome
         self.__id = random.randint(1,9999) 
         self.__area = area

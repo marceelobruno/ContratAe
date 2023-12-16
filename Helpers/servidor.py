@@ -169,6 +169,7 @@ def protocol(cliente, data_cliente):
     elif data_cliente['protocol_msg'] == 'verCandidaturas':
                     
                     vagasCandidato = TableCandidatos[data_cliente["cpf"]].vagas_aplicadas
+                    print(vagasCandidato)
 
                     if len(vagasCandidato) == 0:
                         protocol_response = {"status":"404 Not Found", "message":"Não há candidaturas."}
@@ -273,6 +274,8 @@ def protocol(cliente, data_cliente):
                 user_recrutador.empresa,
                 vaga_info["salario_vaga"], vaga_info["requisitos"]))
         
+        print(ListaVagas)
+        
         protocol_response = {"status": '201 Created', "message": "Vaga criada !"}
         cliente.send(json.dumps(protocol_response).encode('utf-8'))
         handle_client(cliente)
@@ -285,6 +288,7 @@ def protocol(cliente, data_cliente):
 
         idVaga = data_cliente['idVaga']
         cand = TableCandidatos[data_cliente["cpf"]].dict_user()
+        print(cand)
 
         for vaga in ListaVagas:
             if vaga.id == idVaga:
@@ -300,8 +304,8 @@ def protocol(cliente, data_cliente):
                     
                     cand = TableCandidatos[data_cliente["cpf"]]
                     
-                    vaga.adicionarCandidatura(cand)
-                    cand.candidatar(vaga)
+                    vaga.adicionarCandidatura(cand.dict_user())
+                    cand.candidatar(vaga.dict_vaga())
 
 
                     protocol_response = {"status": "200 OK","message": 'Candidatura registrada com sucesso!'}
@@ -321,17 +325,15 @@ def protocol(cliente, data_cliente):
 
             logger.info('entrei')
             idVaga = data_cliente['idVaga']
-            candi = TableCandidatos[data_cliente["cpf"]].dict_user()
-            logger.info(candi.vagas_aplicadas)
+            candi = TableCandidatos[data_cliente["cpf"]]
+            lista_candi = candi.vagas_aplicadas
 
-            for vaga in candi.vagas_aplicadas:
-                if vaga.id == idVaga:
+            logger.info(lista_candi)
 
-                    indice_remocao_cand = candi.vagas_aplicadas.index(vaga)
-                    candi.cancelar_candidatura(indice_remocao_cand)
-
-                    indice_remocao_vaga = vaga.lista_candidaturas.index(candi)
-                    vaga.removerCandidatura(indice_remocao_vaga)
+            for vaga in lista_candi:
+                if vaga['id'] == idVaga:
+                    vaga['lista_candidaturas'].remove(candi.dict_user()) 
+                    candi.cancelar_candidatura(vaga)                        
 
                     protocol_response = {'status':"200 OK", 'message': 'Cancelamento efetuado com sucesso.'}
                     cliente.send(json.dumps(protocol_response).encode('utf-8'))

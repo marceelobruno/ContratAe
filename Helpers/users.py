@@ -92,15 +92,15 @@ class Candidato:
         return self.__cpf
 
 
-    def candidatar(self, vaga: Vaga):#<-----em análise
-        self.__vagas_aplicadas.append(vaga.dict_vaga())
+    def candidatar(self, vaga):#<-----em análise
+        self.__vagas_aplicadas.append(vaga)
     
     def ver_candidaturas(self)->None:
         """Mostra as candidaturas efetuadas pelo candidato.
         """
         return self.vagas_aplicadas
 
-    def cancelar_candidatura(self,key:int) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
+    def cancelar_candidatura(self,key:any) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
         """Remove a vaga especifíca da lista de vagas aplicadas. 
 
         Args:
@@ -109,7 +109,7 @@ class Candidato:
         Returns:
             None
         """
-        self.vagas_aplicadas.pop(key)
+        self.vagas_aplicadas.remove(key)
     
     def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):
         self.__skills = skills

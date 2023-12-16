@@ -3,6 +3,7 @@ import json
 import re 
 from loguru import logger
 from hashlib import sha256
+import sys
 
 HOST = '127.0.0.1'
 PORT = 5000
@@ -10,8 +11,14 @@ PORT = 5000
 servidor = (HOST, PORT)
 
 cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-cliente_socket.connect(servidor)
 
+try:
+    cliente_socket.connect(servidor)
+except ConnectionRefusedError:
+    print('Não foi possível estabelecer conexão com o servidor.')
+    sys.exit(1)
+
+    
 def run_cliente():
     print("=== ContratAe ===")
     print()
@@ -99,7 +106,12 @@ def entar(type, action):
 
             nome = input("Digite o nome: ")
             email = input("Digite o email: ")
-            cpf = input("Digite seu CPF: ")
+            while True:
+                cpf = input('CPF: ')
+                if all(cpf.isdigit() for cpf in cpf):
+                    break
+                else:
+                    print('O CPF é inválido')
 
             # hasheando a senha para sha256
             hash_passwd = sha256(input("Digite sua senha: ").encode('utf-8'))
@@ -108,7 +120,7 @@ def entar(type, action):
 
             empresa = ''
             if type == "r":
-                empresa = input("Digite a empresa para a qual você está recrutando: ")
+                empresa = input("Digite o nome da empresa para a qual você está recrutando: ")
 
             data_cliente ={
                 'protocol_msg': protocol_msg,
@@ -132,6 +144,23 @@ def entar(type, action):
             else:
                 dashboard(response_server['data'],type) # -> chamando a função principal do cliente
                 break
+
+def mostrarVagas(vaga):
+     print(f"""
+    -------------------------                              
+
+    Nome: {vaga["nome"]}
+    ID: {vaga['id']}
+    Area: {vaga["area"]}
+    Descricao: {vaga["descricao"]}
+    Quantidade de vagas: {vaga['quantidade']}
+    Empresa: {vaga['nome_empresa']}
+    Salario: {vaga['salario']}
+    Requisitos: {vaga['requisitos']}
+
+    -------------------------
+
+                        """)    
 
 def dashboard(cpf,type):
 
@@ -190,7 +219,7 @@ def dashboard(cpf,type):
                     print(ae)
 
             content_dash = {}
-            idVaga = ''
+            # idVaga = ''
             
             if entrada == '1':
                 protocol_msg = 'verVagas'
@@ -237,21 +266,8 @@ def dashboard(cpf,type):
                 else:
                     listaVagas = response_server['data']
                     for vaga in listaVagas:
-                        print(f"""
-                        -------------------------                              
-
-                        Nome: {vaga["nome"]}
-                        ID: {vaga['id']}
-                        Area: {vaga["area"]}
-                        Descricao: {vaga["descricao"]}
-                        Quantidade de vagas: {vaga['quantidade']}
-                        Empresa: {vaga['nome_empresa']}
-                        Salario: {vaga['salario']}
-                        Requisitos: {vaga['requisitos']}
-
-                        -------------------------
-
-                        """)
+                        mostrarVagas(vaga)
+                       
 
             elif protocol_msg == 'candidatar' or protocol_msg == "cancelarCandidatura":
 
@@ -266,21 +282,7 @@ def dashboard(cpf,type):
                     candidato_candidaturas = response_server['data']
                     print('\nEstas são as vagas que você se candidatou:\n')
                     for vaga in candidato_candidaturas:
-                        print(f"""
-                        -------------------------                              
-
-                        Nome: {vaga["nome"]}
-                        ID: {vaga['id']}
-                        Area: {vaga["area"]}
-                        Descricao: {vaga["descricao"]}
-                        Quantidade de vagas: {vaga['quantidade']}
-                        Empresa: {vaga['nome_empresa']}
-                        Salario: {vaga['salario']}
-                        Requisitos: {vaga['requisitos']}
-
-                        -------------------------
-
-                        """)
+                        mostrarVagas(vaga)
 
                 elif response_server['status'] == '404 Not Found':
                     print(response_server['message'])
@@ -314,8 +316,25 @@ def dashboard(cpf,type):
             dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
             dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
             dict_vaga["descricao_vaga"] = input("Digite uma breve descrição: ")
-            dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
-            dict_vaga["salario_vaga"] = input("Digite o salário: ")
+            while True:
+                try:
+                    dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
+                    if dict_vaga["quant_candidaturas"] <= 0:
+                        raise ValueError('Digite um número válido maior que 0.')
+                    break
+                except ValueError:
+                    print('Digite um número válido maior que 0.')
+            
+            while True:
+                try:       
+                    dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
+                    assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
+                    break
+                except AssertionError as ae:
+                    print(ae)
+                except ValueError:
+                    print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
+
             dict_vaga["requisitos"] = []
 
             while True:
