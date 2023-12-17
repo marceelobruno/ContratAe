@@ -1,4 +1,3 @@
-from DataStructures.ListaSequencialNumPY import Lista
 from vaga import Vaga
 
 
@@ -26,12 +25,36 @@ class Recrutador:
     def senha(self):
         return self.__senha
     
-    def criar_vaga(self, nome, area, descricao, quantidade, empresa, salario, requisitos):
+    def criar_vaga(self, nome:str, area:str, descricao:str, quantidade:int, empresa:str, salario:float, requisitos:list):
+        """
+        Método responsável por criar um objeto Vaga no servidor.
+        Recebe os parâmetros do objeto Vaga e retorna o próprio objeto. 
+
+        Args:
+            nome (str): nome da vaga.
+            area (str): area da vaga.
+            descricao (str): descrição da vaga.
+            quantidade (int): quantidade de candidaturas aceitas na vaga.
+            empresa (str): empresa associada a vaga.
+            salario (float): salário apresentado na vaga.
+            requisitos (list): requisitos prévios na vaga.
+
+        Returns:
+            Vaga: Retorna o objeto Vaga. 
+        """
         return Vaga(
             nome, area, descricao, quantidade, empresa, salario, requisitos
         )
 
     def dict_user(self):
+        """
+        Método que traduz as informações do recrutador para 
+        dicionário.
+
+        Returns:
+            dict: Informações do objeto Recrutador em um 
+            dicionário.
+        """
         user_dict = {
             "nome": self.__nome,
             "email": self.__email,
@@ -96,7 +119,14 @@ class Candidato:
         return self.__cpf
 
 
-    def candidatar(self, vaga):#<-----em análise
+    def candidatar(self, vaga:dict)-> None:#<-----em análise
+        """
+        Método qua adiciona uma vaga (em formato de dicionário)
+        na lista de vagas aplicadas do candidato.
+
+        Args:
+            vaga (dict): vaga em formato de dicionário.
+        """
         self.__vagas_aplicadas.append(vaga)
     
     def ver_candidaturas(self)->None:
@@ -104,18 +134,30 @@ class Candidato:
         """
         return self.vagas_aplicadas
 
-    def cancelar_candidatura(self,key:any) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
+    def cancelar_candidatura(self,elemento:dict) -> None: #<----------APLICAR TRATAMENTO DE ERRO!!
         """Remove a vaga especifíca da lista de vagas aplicadas. 
 
         Args:
-            key (any): Posição do objeto Vaga. 
+            elemento (any): dicionário vaga a ser retirado da
+            lista de vagas aplicadas. 
 
         Returns:
             None
         """
-        self.vagas_aplicadas.remove(key)
+        self.vagas_aplicadas.remove(elemento)
     
-    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str ):
+    def criar_perfil(self, skills:list, area:str, descricao:str, cidade:str, uf:str )->None:
+        """
+        Método que adiciona as informações secundárias ao 
+        perfil do candidato.
+
+        Args:
+            skills (list): lista de competências do candidato.
+            area (str): area que o candidato almeija a vaga.
+            descricao (str): breve descricao sobre o candidato.
+            cidade (str): cidade que o candidato reside.
+            uf (str): estado que o candidato reside.
+        """
         self.__skills = skills
         self.__area = area
         self.__descricao = descricao
@@ -123,12 +165,28 @@ class Candidato:
         self.__uf = uf
         
     def perfil_completo(self):
+        """
+        Método que verifica se o perfil do candidato contém
+        as informações secundárias.
+
+        Returns:
+            True: Se os atributos forem diferentes de None.
+            False: Se os atributos forem None.
+        """
         if self.__skills != None and self.__area != None and self.__descricao != None:
             return True
         else:
             return False
     
     def dict_user(self):
+        """
+        Método que traduz as informações do candidato para 
+        dicionário.
+
+        Returns:
+            dict: Informações do objeto Candidato em um 
+            dicionário.
+        """
         user_dict = {
             "nome": self.__nome,
             "email": self.__email,

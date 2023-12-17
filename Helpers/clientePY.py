@@ -206,9 +206,9 @@ def dashboard(cpf,type):
             response_serverP = json.loads(response_serverP.decode('utf-8')) 
             
             print(response_serverP['message'])
-
-            print('Bem-vindo ao ContratAe!')
-            print("----------------------")
+        print('\n\n----------------------')
+        print('Bem-vindo ao ContratAe!')
+        print("----------------------")
 
         while True:
             while True:
@@ -379,19 +379,30 @@ def dashboard(cpf,type):
 
                 cliente_socket.send(json.dumps(content_dash).encode('utf-8'))
 
-                response_server = cliente_socket.recv(1024)
-                response_server = json.loads(response_server.decode('utf-8'))
+                new_response_server = cliente_socket.recv(1024)
+                new_response_server = json.loads(new_response_server.decode('utf-8'))
 
-                for candidato in response_server['data']:
-                    print(candidato)
+                if new_response_server['404 Not Found']:
+                    print(new_response_server['message'])
+
+                else:
+                    for candidato in new_response_server['data']:
+                        print(f"""
+            =============================================
+                    Nome: {candidato['nome']}
+                    CPF: {candidato['cpf']}
+                    Email: {candidato['email']}
+                    Área: {candidato['area']}
+                    Competências: {candidato['skills']}
+                    Cidade: {candidato['cidade']}
+                    UF: {candidato['uf']}
+
+                    Descrição: {candidato['descricao']}
+                        """)
 
             elif entrada == '2':
                 cliente_socket.close()
                 sys.exit(1)
-
-
-
-
 
 
 

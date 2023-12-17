@@ -27,10 +27,6 @@ class Vaga:
     def quantidade(self):
         return self.__quantidade
     
-    # @quantidade.setter
-    # def quantidade(self,value):
-    #     self.quantidade += value
-
     
     def adicionarCandidatura(self,candidato):
         self.__lista_candidaturas.append(candidato)
