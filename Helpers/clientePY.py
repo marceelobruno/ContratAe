@@ -146,7 +146,7 @@ def entar(type, action):
                 break
 
 def mostrarVagas(vaga):
-     print(f"""
+    print(f"""
     -------------------------                              
 
     Nome: {vaga["nome"]}
@@ -207,13 +207,16 @@ def dashboard(cpf,type):
             
             print(response_serverP['message'])
 
+            print('Bem-vindo ao ContratAe!')
+            print("----------------------")
+
         while True:
             while True:
                 try:
                     print()
-                    entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Cancelar candidatura\n4-Ver perfil\n5-Ver candidaturas\n\n')
+                    entrada = input('Digite o que deseja fazer:\n\n1-Ver vagas\n2-Candidatar a vaga\n3-Cancelar candidatura\n4-Ver perfil\n5-Ver candidaturas\n6-Sair\n\n')
                     print()
-                    assert entrada in ['1','2','3','4','5'], 'Escolha uma das opções acima.'
+                    assert entrada in ['1','2','3','4','5','6'], 'Escolha uma das opções acima.'
                     break
                 except AssertionError as ae:
                     print(ae)
@@ -250,6 +253,10 @@ def dashboard(cpf,type):
             elif entrada == '5':
                 protocol_msg = 'verCandidaturas'
 
+            elif entrada == '6':
+                cliente_socket.close()
+                sys.exit(1)
+
             content_dash['protocol_msg'] = protocol_msg
             content_dash['cpf'] = cpf
 
@@ -259,24 +266,20 @@ def dashboard(cpf,type):
             response_server = json.loads(response_server.decode('utf-8'))
 
             if protocol_msg == 'verVagas':
-
                 if response_server["status"] == "404 Not Found":
                     print(response_server["message"])
                 else:
                     listaVagas = response_server['data']
                     for vaga in listaVagas:
                         mostrarVagas(vaga)
-                       
 
             elif protocol_msg == 'candidatar' or protocol_msg == "cancelarCandidatura":
-
                 if response_server['status'] == "200 OK":
                     logger.info(response_server['message'])
                 else:
                     logger.error(response_server['message'])
                 
             elif protocol_msg == 'verCandidaturas':
-
                 if response_server['status']  == '200 OK':
                     candidato_candidaturas = response_server['data']
                     print('\nEstas são as vagas que você se candidatou:\n')
@@ -290,7 +293,6 @@ def dashboard(cpf,type):
             elif protocol_msg == 'verPerfil':
                 perfil = response_server['data']
                 print(f"""
-                      
         Nome: {perfil['nome']}                         
         CPF: {perfil['cpf']}
         Email: {perfil['email']}
@@ -304,55 +306,93 @@ def dashboard(cpf,type):
 
 
     elif type == 'r':
+        print()
+        print('Bem-vindo ao ContratAe!')
+        print("----------------------")
+        print("Crie sua primeira vaga")
+        print("----------------------")
+
+
+        protocol_msg = "criar_vaga"
+        dict_vaga = {}
+        dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
+        dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
+        dict_vaga["descricao_vaga"] = input("Digite uma breve descrição: ")
+
         while True:
-            print()
-            print('Bem-vindo ao ContratAe!')
-            print("----------------------")
-            protocol_msg = "criar_vaga"
-            print("Crie sua primeira vaga")
-            print("----------------------")
-            dict_vaga = {}
-            dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
-            dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
-            dict_vaga["descricao_vaga"] = input("Digite uma breve descrição: ")
-            
+            try:
+                dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
+                if dict_vaga["quant_candidaturas"] <= 0:
+                    raise ValueError('Digite um número válido maior que 0.')
+                break
+            except ValueError:
+                print('Digite um número válido maior que 0.')
+        
+        while True:
+            try:       
+                dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
+                assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
+                break
+            except AssertionError as ae:
+                print(ae)
+            except ValueError:
+                print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
+
+        dict_vaga["requisitos"] = []
+
+        while True:
+            resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
+            if resquisito_vaga == '.':
+                break
+            dict_vaga["requisitos"].append(resquisito_vaga)
+
+        
+        data_cliente = {'protocol_msg': protocol_msg, 'type': 'r', 'cpf': cpf, 'vaga_info': dict_vaga}
+        
+        cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
+        
+        response_server = cliente_socket.recv(1024)
+        response_server = json.loads(response_server.decode('utf-8'))
+        
+        logger.info(response_server["message"])
+
+        while True:
             while True:
                 try:
-                    dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
-                    if dict_vaga["quant_candidaturas"] <= 0:
-                        raise ValueError('Digite um número válido maior que 0.')
-                    break
-                except ValueError:
-                    print('Digite um número válido maior que 0.')
-            
-            while True:
-                try:       
-                    dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
-                    assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
+                    print()
+                    entrada = input('Digite o que deseja fazer:\n\n1-Ver candidaturas da vaga\n2-Sair\n\n')
+                    print()
+                    assert entrada in ['1','2'], 'Escolha uma das opções acima.'
                     break
                 except AssertionError as ae:
                     print(ae)
-                except ValueError:
-                    print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
 
-            dict_vaga["requisitos"] = []
+            content_dash = {}
 
-            while True:
-                resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
-                if resquisito_vaga == '.':
-                    break
-                dict_vaga["requisitos"].append(resquisito_vaga)
+            if entrada == '1':
 
-            
-            data_cliente = {'protocol_msg': protocol_msg, 'type': 'r', 'cpf': cpf, 'vaga_info': dict_vaga}
-            
-            cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
-            
-            response_server = cliente_socket.recv(1024)
-            response_server = json.loads(response_server.decode('utf-8'))
-            
-            logger.info(response_server["message"])
+                protocol_msg = 'verCandidaturas'
+                content_dash['cpf'] = cpf
+                content_dash['protocol_msg'] = protocol_msg
+                content_dash['type'] = type
+                content_dash['idVaga'] = response_server['data']
 
-            # cliente_socket.close()
+                cliente_socket.send(json.dumps(content_dash).encode('utf-8'))
+
+                response_server = cliente_socket.recv(1024)
+                response_server = json.loads(response_server.decode('utf-8'))
+
+                for candidato in response_server['data']:
+                    print(candidato)
+
+            elif entrada == '2':
+                cliente_socket.close()
+                sys.exit(1)
+
+
+
+
+
+
 
 run_cliente()

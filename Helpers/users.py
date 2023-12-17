@@ -22,6 +22,10 @@ class Recrutador:
     def empresa(self):
         return self.__nome_empresa
     
+    @property
+    def senha(self):
+        return self.__senha
+    
     def criar_vaga(self, nome, area, descricao, quantidade, empresa, salario, requisitos):
         return Vaga(
             nome, area, descricao, quantidade, empresa, salario, requisitos
