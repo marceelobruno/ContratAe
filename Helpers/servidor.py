@@ -82,6 +82,7 @@ def handle_client(cliente,addr=None):
     try:
         data_recv = cliente.recv(1024)
         data_recv_decoded = json.loads(data_recv.decode('utf-8'))
+        print(data_recv_decoded)
         data_cliente =  data_recv_decoded
 
         protocol(cliente,data_cliente,addr)
@@ -134,7 +135,7 @@ def protocol(cliente, data_cliente,addr):
     """
     #---------LOGIN-----------
 
-    if data_cliente["protocol_msg"] == 'LOGIN':
+    if data_cliente["protocol_msg"] == 'login':
 
         #PARÂMETROS DE LOGIN ===> [protocol_msg, type, cpf, senha]
         print("entrei", data_cliente["protocol_msg"])

@@ -62,7 +62,7 @@ def entar(type, action):
     
     if action == "login":     
         while True:
-            protocol_msg = "LOGIN"
+            protocol_msg = "login"
             while True:
                 cpf = input('CPF: ')
                 if all(cpf.isdigit() for cpf in cpf):
