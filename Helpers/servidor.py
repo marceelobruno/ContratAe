@@ -116,32 +116,30 @@ def handle_client(cliente, addr=None):
         print(clientes[addr], ' desconectou.')
 
 def recrutador(data_cliente):
-    user_recrutador = TableRecrutadores[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
+    user_recrutador = TableRecrutadores[data_cliente["cpf"]]  # -> recuperando a referencia do objeto Recrutador
     if user_recrutador:
         return user_recrutador  # -> enviando a referencia do objeto para o cliente
     else:
         return None
 
 def candidato(data_cliente):
-    user_candidato = TableCandidatos[data_cliente["cpf"]]  # -> recuperando a referencia do objeto candidato
+    user_candidato = TableCandidatos[data_cliente["cpf"]]  # -> recuperando a referencia do objeto Candidato
     if user_candidato:
         return user_candidato  # -> enviando a referencia do objeto para o cliente
     else:
         return None
 
 def formatar_lista(lista):
-    liste = []
+    lista_formatada = []
     for i in lista:
-        liste.append(i.dict_vagaMOD())
-        # print(i.dict_vaga())
-        # print(type(i.dict_vaga()))
-    return liste
+        lista_formatada.append(i.dict_vagaMOD())
+    return lista_formatada
 
 def procurar_vaga(lista, idVaga):
-    if type(lista) == dict:
+    try:
         for vaga in lista:
             return vaga if vaga['id'] == idVaga else None
-    else:
+    except:
         for vaga in lista:
             return vaga if vaga.id == idVaga else None
 
@@ -158,7 +156,6 @@ def protocol(cliente, data_cliente, addr):
     # --------- LOGIN -----------
     if data_cliente["protocol_msg"] == 'LOGIN':
 
-        # PARÂMETROS DE LOGIN ===> [protocol_msg, type, cpf, senha]
         print("entrei", data_cliente["protocol_msg"])
 
         if data_cliente["type"] == "c":
@@ -220,6 +217,9 @@ def protocol(cliente, data_cliente, addr):
 
         if data_cliente['type'] == 'c':
             vagasCandidato = TableCandidatos[data_cliente["cpf"]].vagas_aplicadas
+            # #Essa expressão 
+            # for vaga in vagasCandidato:
+            #     vaga.pop('lista_candidaturas')
             print(vagasCandidato)
 
             if len(vagasCandidato) == 0:
@@ -234,9 +234,15 @@ def protocol(cliente, data_cliente, addr):
         elif data_cliente['type'] == 'r':
             vaga = procurar_vaga(ListaVagas, data_cliente['idVaga'])
 
-            if len(vaga.lista_candidaturas) == 0:
+            if vaga == None:
+                protocol_response = {"status": '404 Not Found', "message": 'Vaga não encontrada.'}
+                cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                handle_client(cliente,addr)
+
+            elif len(vaga.lista_candidaturas) == 0:
                 protocol_response = {"status": '404 Not Found', "message": 'Sua vaga não possui candidaturas.'}
                 cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                handle_client(cliente,addr)
             else:
                 protocol_response = {"status":"200 OK", "data": vaga.lista_candidaturas }
                 cliente.send(json.dumps(protocol_response).encode('utf-8'))
@@ -356,6 +362,13 @@ def protocol(cliente, data_cliente, addr):
         cand = TableCandidatos[data_cliente["cpf"]].dict_user()
         cpf_cand = cand['cpf']
 
+        if len(ListaVagas) == 0:
+            protocol_response = {"status": "404 Not Found", "message": 'Não há vagas cadastradas...'}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            mutex.release()
+            handle_client(cliente, addr)
+
+
         for vaga in ListaVagas:
             if vaga.id == idVaga:
                 if vaga.vagaEstaCheia():
@@ -373,14 +386,14 @@ def protocol(cliente, data_cliente, addr):
                     cand = TableCandidatos[data_cliente["cpf"]]
 
                     vaga.adicionarCandidatura(cand.dict_user())
-                    cand.candidatar(vaga.dict_vaga())
+                    cand.candidatar(vaga.dict_vagaMOD())
 
                     # Cadastra em uma vaga determinado candidato na tabela Candidaturas
                     CandidatoDB().candidatar_se(cpf_cand, idVaga)
 
                     protocol_response = {"status": "200 OK", "message": 'Candidatura registrada com sucesso!'}
                     logger.info(protocol_response["message"])
-                    print(cand.vagas_aplicadas)
+                    # print(cand.vagas_aplicadas)
                     cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     mutex.release()
                     handle_client(cliente, addr)
@@ -439,7 +452,7 @@ def protocol(cliente, data_cliente, addr):
         usuario = TableCandidatos[data_cliente["cpf"]]
 
         usuario.criar_perfil(data_cliente['skills'], data_cliente['area'], data_cliente['descricao'],data_cliente['cidade'], data_cliente['uf'])
-
+        
         # Inserindo as informações complementares do Candidato no Banco de Dados
         candidate = CandidatoDB()
         candidate.completar_perfil_candidato(
@@ -470,5 +483,5 @@ def run_server():
 
 
 # print(TableRecrutadores)
-# run_server()
+run_server()
 get_recrutadores_from_supabase()

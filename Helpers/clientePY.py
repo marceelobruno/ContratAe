@@ -271,7 +271,7 @@ def dashboard(cpf, type):
 
             if protocol_msg == 'verVagas':
                 if response_server["status"] == "404 Not Found":
-                    print(response_server["message"])
+                    logger.error(response_server["message"])
                 else:
                     listaVagas = response_server['data']
                     for vaga in listaVagas:
@@ -291,7 +291,7 @@ def dashboard(cpf, type):
                         mostrarVagas(vaga)
 
                 elif response_server['status'] == '404 Not Found':
-                    print(response_server['message'])
+                    logger.error(response_server['message'])
 
             elif protocol_msg == 'verPerfil':
                 perfil = response_server['data']
@@ -337,14 +337,6 @@ def dashboard(cpf, type):
                 print(ae)
             except ValueError:
                 print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
-
-        # dict_vaga["requisitos"] = []
-
-        # while True:
-        #     resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
-        #     if resquisito_vaga == '.':
-        #         break
-        #     dict_vaga["requisitos"].append(resquisito_vaga)
 
         dict_vaga["requisitos"] = ''
         while True:
@@ -392,7 +384,7 @@ def dashboard(cpf, type):
                 new_response_server = cliente_socket.recv(1024)
                 new_response_server = json.loads(new_response_server.decode('utf-8'))
 
-                if new_response_server['404 Not Found']:
+                if new_response_server['status'] == '404 Not Found':
                     print(new_response_server['message'])
 
                 else:

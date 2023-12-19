@@ -36,23 +36,38 @@ class Vaga:
         self.__lista_candidaturas.append(candidato)
         self.__quantidade -= 1
 
-    def removerCandidatura(self, key):
-        self.__lista_candidaturas.pop(key)
-        self.__quantidade += 1
+    # def removerCandidatura(self, key):
+    #     self.__lista_candidaturas.pop(key)
+    #     self.__quantidade += 1
 
-    def gerarID(self):
-        self.__id = random.randint(1, 9999)
+    # def gerarID(self):
+    #     self.__id = random.randint(1, 9999)
 
     def aumentar_quantidade(self):
         self.__quantidade += 1
 
-    def mostrarCandidaturas(self):
-        return self.__lista_candidaturas
+    # def mostrarCandidaturas(self):
+    #     return self.__lista_candidaturas
 
     def vagaEstaCheia(self):
+        """
+        Este método confere se a quantidade de vagas disponíveis 
+        estão esgotadas.
+
+        Returns:
+            Boolean: Retorna True se estiver cheia, False se não
+        """
         return self.__quantidade == 0
 
     def dict_vaga(self):
+        """
+        Esse método transforma os dados da vaga em um dicionário.
+        Ele é necessário desde que não é possível converter o objeto 
+        Vaga( assim como Candidato e Recrutador ) em json.
+
+        Returns:
+            dict : o objeto em forma de dicionário 
+        """
         vaga_dict = {
             "nome": self.__nome,
             "area": self.__area,
@@ -67,6 +82,16 @@ class Vaga:
         return vaga_dict
 
     def dict_vagaMOD(self):
+        """
+        Esse método faz a mesma coisa que o superior, mas ele omite 
+        o atributo lista_candidaturas. Ao analisar os dados capturados no wireshark, 
+        era possível ver o atributo lista_candidaturas (preenchido com as informações dos candidatos)
+        trafegando na rede, aumentando o tamanho da mensagem e oferecendo certo perigo
+        aos dados dos candidatos. 
+
+        Returns:
+            dict : o objeto em forma de dicionário
+        """
         vaga_dict = {
             "nome": self.__nome,
             "area": self.__area,
