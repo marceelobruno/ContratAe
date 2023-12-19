@@ -200,20 +200,18 @@ class Candidato:
 
         return user_dict
 
-    def __str__(self) -> str:  # <---------Opção Ver perfil do menu do cliente.
+    def __str__(self) -> str:  # <-------- Opção Ver perfil do menu do cliente.
         return f"""
 
-        
-        Nome: {self.__nome}                         
+        Nome: {self.__nome}
         CPF: {self.__cpf}
         Email: {self.__email}
         Skills: {self.__skills}
         Area: {self.__area}
         Descricao: {self.__descricao}
         Cidade: {self.__cidade}
-        Uf: {self.__uf} 
-""" 
-    
+        UF: {self.__uf}
+"""
 
 
 if __name__ == "__main__":

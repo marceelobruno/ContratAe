@@ -62,8 +62,8 @@ Formato de Esperado:
   "email": "JohnDoea@example.com",
   "cpf": "12345675432",
   "type": "r",
-  "senha": "senha"
-  "empre": "Securitas Inc"
+  "senha": "senha",
+  "empresa": "Securitas Inc"
 }
 ```
 O parâmetro empresa é necessário apenas para usuários recrutadores (`r`).

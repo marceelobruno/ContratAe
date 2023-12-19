@@ -32,5 +32,8 @@
 # i = float(input('numero: '))
 # print(i)
 
-d = {'a': 1, 'b':2, 'c':3}
-print(len(d))
+d = {"a": 1, "b": 2, "c": 3}
+
+d.pop("a")
+
+print(d)

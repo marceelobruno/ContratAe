@@ -2,7 +2,7 @@
 Classes de Conexão e CRUD para Supabase
 """
 import os
-
+from pprint import pprint
 from dotenv import load_dotenv
 from loguru import logger
 from supabase import Client, create_client
@@ -22,18 +22,7 @@ class CandidatoDB:
     def __init__(self) -> None:
         pass
 
-    def insert_candidato(
-        self,
-        cpf: str,
-        nome: str,
-        email: str,
-        passwd: str,
-        skills: str = None,
-        area: str = None,
-        descricao: str = None,
-        cidade: str = None,
-        uf: str = None,
-    ) -> None:
+    def insert_candidato(self, cpf: str, nome: str, email: str, passwd: str) -> None:
         """Este método insere um novo candidato cadastrado na hashtable direto
         para o banco de dados."""
         data = (
@@ -41,10 +30,32 @@ class CandidatoDB:
             .table("candidato")
             .insert(
                 {
+                    "cpf": f"{cpf}", "nome": f"{nome}",
+                    "email": f"{email}", "senha": f"{passwd}",
+                }
+            )
+            .execute()
+        )
+        assert len(data.data) > 0
+        logger.info(f"Candidato: {cpf} {nome} — inserido no Banco de Dados!")
+
+    def completar_perfil_candidato(
+        self,
+        cpf: str,
+        skills: str,
+        area: str,
+        descricao: str,
+        cidade: str,
+        uf: str,
+    ) -> None:
+        """Este método completa o perfil de cadastro para um determinado
+        candidato banco de dados."""
+        data = (
+            supabase_conn(url, key)
+            .table("candidato")
+            .update(
+                {
                     "cpf": f"{cpf}",
-                    "nome": f"{nome}",
-                    "email": f"{email}",
-                    "senha": f"{passwd}",
                     "skills": f"{skills}",
                     "area": f"{area}",
                     "descricao": f"{descricao}",
@@ -52,10 +63,11 @@ class CandidatoDB:
                     "uf": f"{uf}",
                 }
             )
+            .eq("cpf", f"{cpf}")
             .execute()
         )
         assert len(data.data) > 0
-        logger.info(f"Candidato: {cpf} {nome} — inserido no Banco de Dados!")
+        return logger.info(f"Perfil completado para o Candidato: {cpf}")
 
     def delete_candidato(self, cpf: str) -> None:
         """Desc"""
@@ -121,6 +133,17 @@ class CandidatoDB:
         assert len(data.data) > 0
         logger.info(f"Candidato: {cpf} inscreveu-se na vaga: {id_vaga}")
 
+    def delete_candidatura(self, cpf: str, id_vaga: int) -> None:
+        """Método que remove uma determinada candidatura por um candidato"""
+        data = (
+            supabase_conn(url, key)
+            .table("candidaturas")
+            .delete()
+            .eq("id_candidato", f"{cpf}")
+            .eq("id_vaga", f"{id_vaga}")
+            .execute()
+        )
+        return logger.info(f"Candidato: {cpf} - Cancelou sua candidatura para vaga: {id_vaga}")
 
 
 class RecrutadorDB:
@@ -132,8 +155,7 @@ class RecrutadorDB:
     def insert_recrutador(
         self, cpf: str, nome: str, empresa: str, email: str, passwd: str
     ) -> None:
-        """Este método insere um novo recrutador cadastrado na hashtable direto
-        para o banco de dados."""
+        """Este método insere um novo recrutador para a tabela Recrutador o banco de dados."""
         data = (
             supabase_conn(url, key)
             .table("recrutador")
@@ -203,8 +225,8 @@ class VagaDB():
         salario: float,
         requisito: str,
     ) -> None:
-        """Este método insere uma nova vaga cadastrada na lista direto
-        para o banco de dados."""
+        """Este método insere uma nova vaga cadastrada por um determinado
+        Recrutador direto para o banco de dados."""
         data = (
             supabase_conn(url, key)
             .table("vaga")
@@ -282,7 +304,8 @@ if __name__ == "__main__":
     # candidato.insert_candidato("22244466688", "Bino", "bino@gmail.com", senha, cidade='Santos', uf='SP')
     # candidato.delete_candidato('22244466688')
     # print(candidato.get_candidato_passwrd("22244466688"))
-    # pprint(candidato.get_all_candidatos())
+    pprint(candidato.get_all_candidatos())
+    # candidato.delete_candidatura('44455566677', 97736)
 
     # VALIDANDO MÉTODOS PARA CLASSE RECRUTADOR
     # recrutador.insert_recrutador('77755533311', 'Zé', 'Youtube', 'defante@yt.com','976fd3649d3175915cf4cfd327bca59ae742de6cc13bb0cf0d70105e52c15762')
@@ -305,3 +328,4 @@ if __name__ == "__main__":
     # vaga.delete_vaga(30844)
     # print('VAGAS:\n', vaga.get_all_vagas())
     # print(vaga.get_vagas_recrutador('99966633311'))
+    # candidato.completar_perfil_candidato('44455566677', 'SQL, Python, PowerBI', 'Dados', 'Sou Marcelo', 'Cabedelo', 'PB')
