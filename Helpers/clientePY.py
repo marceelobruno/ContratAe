@@ -1,9 +1,9 @@
-import socket
 import json
-import re 
-from loguru import logger
-from hashlib import sha256
+import socket
 import sys
+from hashlib import sha256
+
+from loguru import logger
 
 HOST = '127.0.0.1'
 PORT = 5000
@@ -18,7 +18,7 @@ except ConnectionRefusedError:
     print('Não foi possível estabelecer conexão com o servidor.')
     sys.exit(1)
 
-    
+
 def run_cliente():
     print("=== ContratAe ===")
     print()
@@ -41,7 +41,7 @@ def run_cliente():
                 type_user = input(
                     "você é ( c ) candidato ou ( r ) recrutador: ( c / r ): \n"
                 ).lower()
-                assert type_user in ['c','r'], 'Por favor, escolha entre (c) candidato ou (r) recrutador.' 
+                assert type_user in ['c','r'], 'Por favor, escolha entre (c) candidato ou (r) recrutador: '
                 break
             except AssertionError as ae:
                 print(ae)
@@ -60,7 +60,7 @@ def run_cliente():
 
 def entar(type, action):
     
-    if action == "login":     
+    if action == "login":
         while True:
             protocol_msg = "LOGIN"
             while True:
@@ -83,14 +83,13 @@ def entar(type, action):
             #transforma a data em json
             data_send = json.dumps(data).encode('utf-8')
             cliente_socket.send(data_send)  # -> enviando via sockets
-            
 
             response_server = cliente_socket.recv(1024)
             response_server = json.loads(response_server.decode('utf-8'))
-            
+
             if response_server["status"] == "404 Not Found" or response_server["status"] == "401 Unauthorized":
                 print(response_server["message"])
-                
+
             else:
                 dashboard(response_server['data'],type)
                 break
@@ -122,32 +121,32 @@ def entar(type, action):
             if type == "r":
                 empresa = input("Digite o nome da empresa para a qual você está recrutando: ")
 
-            data_cliente ={
+            data_cliente = {
                 'protocol_msg': protocol_msg,
                 'nome': nome,
-                'email':email,
-                'cpf':cpf,
-                'type':type,
-                'senha':senha,
-                'empresa':empresa
+                'email': email,
+                'cpf': cpf,
+                'type': type,
+                'senha': senha,
+                'empresa': empresa
             }
 
             data_send = json.dumps(data_cliente).encode('utf-8')
-            cliente_socket.send(data_send) # -> envian via sockets
-            
+            cliente_socket.send(data_send)  # -> enviando via sockets
+
             response_server = cliente_socket.recv(1024)
-            response_server = json.loads(response_server.decode('utf-8')) # -> resposta do servidor
-        
+            response_server = json.loads(response_server.decode('utf-8'))  # -> resposta do servidor
+
             if response_server["status"] == "400 Bad Request":
                 print(response_server["message"])
                 
             else:
-                dashboard(response_server['data'],type) # -> chamando a função principal do cliente
+                dashboard(response_server['data'], type)  # -> chamando a função principal do cliente
                 break
 
 def mostrarVagas(vaga):
     print(f"""
-    -------------------------                              
+    -------------------------
 
     Nome: {vaga["nome"]}
     ID: {vaga['id']}
@@ -160,11 +159,11 @@ def mostrarVagas(vaga):
 
     -------------------------
 
-                        """)    
+""")
 
-def dashboard(cpf,type):
+def dashboard(cpf, type):
 
-    if type == "c": # -> aqui ficará a área do candidato
+    if type == "c":  # -> aqui ficará a área do candidato
         data_veri = {
             'protocol_msg': 'VERIFICAR',
             'cpf': cpf
@@ -177,14 +176,19 @@ def dashboard(cpf,type):
         if response_server['status'] == '406 Incomplete':
             print(response_server['message'])
 
-            listSkills = []
             area = input('Área: ')
+            habilidades = ''
 
             while True:
-                skill = input('Digite suas competências (digite . para encerrar): ')
+                skill = input('Digite suas competências (digite . para encerrar): ').strip()
                 if skill == '.':
                     break
-                listSkills.append(skill)
+                elif len(skill) == 0:
+                    print('Por favor, informe uma competência')
+                    continue
+                habilidades += "".join(skill + ',')
+
+            listSkills = habilidades[:-1]
 
             descricao = input('Descrição (até 140 caracteres): ')
             cidade = input('Cidade: ')
@@ -194,17 +198,17 @@ def dashboard(cpf,type):
                 'protocol_msg': 'completarPerfil',
                 'cpf': cpf,
                 'area': area,
-                'descricao':descricao,
+                'descricao': descricao,
                 'skills': listSkills,
-                'cidade':cidade,
-                'uf':uf
+                'cidade': cidade,
+                'uf': uf
             }
 
             cliente_socket.send(json.dumps(data).encode('utf-8'))
 
             response_serverP = cliente_socket.recv(1024)
             response_serverP = json.loads(response_serverP.decode('utf-8')) 
-            
+
             print(response_serverP['message'])
         print('\n\n----------------------')
         print('Bem-vindo ao ContratAe!')
@@ -222,7 +226,7 @@ def dashboard(cpf,type):
                     print(ae)
 
             content_dash = {}
-            
+
             if entrada == '1':
                 protocol_msg = 'verVagas'
 
@@ -238,7 +242,7 @@ def dashboard(cpf,type):
 
             elif entrada == '3':
                 protocol_msg = 'cancelarCandidatura'
-                
+
                 while True:
                     try:
                         idVaga = int(input('Digite o id da vaga: '))
@@ -249,7 +253,7 @@ def dashboard(cpf,type):
 
             elif entrada == '4':
                 protocol_msg = 'verPerfil'
- 
+
             elif entrada == '5':
                 protocol_msg = 'verCandidaturas'
 
@@ -259,7 +263,7 @@ def dashboard(cpf,type):
 
             content_dash['protocol_msg'] = protocol_msg
             content_dash['cpf'] = cpf
-
+            content_dash['type'] = type
             cliente_socket.send(json.dumps(content_dash).encode('utf-8'))
 
             response_server = cliente_socket.recv(1024)
@@ -289,21 +293,18 @@ def dashboard(cpf,type):
                 elif response_server['status'] == '404 Not Found':
                     print(response_server['message'])
 
-
             elif protocol_msg == 'verPerfil':
                 perfil = response_server['data']
                 print(f"""
-        Nome: {perfil['nome']}                         
+        Nome: {perfil['nome']}
         CPF: {perfil['cpf']}
         Email: {perfil['email']}
         Skills: {perfil['skills']}
-        Area: {perfil['area']}
+        Área: {perfil['area']}
         Descricao: {perfil['descricao']}
         Cidade: {perfil['cidade']}
-        Uf: {perfil['uf']} 
-
+        UF: {perfil['uf']}
 """)
-
 
     elif type == 'r':
         print()
@@ -311,7 +312,6 @@ def dashboard(cpf,type):
         print("----------------------")
         print("Crie sua primeira vaga")
         print("----------------------")
-
 
         protocol_msg = "criar_vaga"
         dict_vaga = {}
@@ -327,9 +327,9 @@ def dashboard(cpf,type):
                 break
             except ValueError:
                 print('Digite um número válido maior que 0.')
-        
+
         while True:
-            try:       
+            try:
                 dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
                 assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
                 break
@@ -338,22 +338,32 @@ def dashboard(cpf,type):
             except ValueError:
                 print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
 
-        dict_vaga["requisitos"] = []
+        # dict_vaga["requisitos"] = []
 
+        # while True:
+        #     resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
+        #     if resquisito_vaga == '.':
+        #         break
+        #     dict_vaga["requisitos"].append(resquisito_vaga)
+
+        dict_vaga["requisitos"] = ''
         while True:
-            resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar)')
+            resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar): ').strip()
             if resquisito_vaga == '.':
                 break
-            dict_vaga["requisitos"].append(resquisito_vaga)
+            elif len(resquisito_vaga) == 0:
+                print('Por favor, informe um requisito')
+                continue
+            dict_vaga["requisitos"] += "".join(resquisito_vaga + ',')
+        dict_vaga["requisitos"] = dict_vaga["requisitos"][:-1]
 
-        
         data_cliente = {'protocol_msg': protocol_msg, 'type': 'r', 'cpf': cpf, 'vaga_info': dict_vaga}
-        
+
         cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
-        
+
         response_server = cliente_socket.recv(1024)
         response_server = json.loads(response_server.decode('utf-8'))
-        
+
         logger.info(response_server["message"])
 
         while True:
@@ -362,7 +372,7 @@ def dashboard(cpf,type):
                     print()
                     entrada = input('Digite o que deseja fazer:\n\n1-Ver candidaturas da vaga\n2-Sair\n\n')
                     print()
-                    assert entrada in ['1','2'], 'Escolha uma das opções acima.'
+                    assert entrada in ['1', '2'], 'Escolha uma das opções acima.'
                     break
                 except AssertionError as ae:
                     print(ae)
@@ -403,7 +413,6 @@ def dashboard(cpf,type):
             elif entrada == '2':
                 cliente_socket.close()
                 sys.exit(1)
-
 
 
 run_cliente()
