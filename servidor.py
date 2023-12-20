@@ -94,9 +94,12 @@ def handle_client(cliente, addr=None):
         data_recv_decoded = json.loads(data_recv.decode('utf-8'))
         data_cliente =  data_recv_decoded
         protocol(cliente, data_cliente, addr)
-    except:
+    except json.decoder.JSONDecodeError:
         print(clientes[addr], ' desconectou.')
-
+    except ConnectionResetError:
+        print(clientes[addr], ' desconectou.')
+    except ConnectionAbortedError:
+        print(clientes[addr], ' desconectou.')
 
 def buscar_usuario(cpf, type):
     if type == "c":
@@ -214,15 +217,21 @@ def protocol(cliente, data_cliente, addr):
         elif data_cliente['type'] == 'r':
 
             for vaga in ListaVagas:
-                if len(vaga.lista_candidaturas) == 0:
-                    protocol_response = {"status": '404 Not Found', "message": 'A vaga não possui candidaturas.'}
-                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
-                    return handle_client(cliente,addr)
-                else:
-                    protocol_response = {"status":"200 OK", "data": vaga.lista_candidaturas}
-                    cliente.send(json.dumps(protocol_response).encode('utf-8'))
-                    return handle_client(cliente, addr)
-                
+                if vaga.id == data_cliente['idVaga']:
+                    if len(vaga.lista_candidaturas) == 0:
+                        protocol_response = {"status": '404 Not Found', "message": 'A vaga não possui candidaturas.'}
+                        cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                        return handle_client(cliente,addr)
+                    else:
+                        protocol_response = {"status":"200 OK", "data": vaga.lista_candidaturas}
+                        cliente.send(json.dumps(protocol_response).encode('utf-8'))
+                        return handle_client(cliente, addr)
+                    
+            protocol_response = {"status":"404 Not Found", "message": 'Vaga não encontrada.'}
+            cliente.send(json.dumps(protocol_response).encode('utf-8'))
+            return handle_client(cliente, addr)
+            
+                            
     # -----------VER PERFIL-------------
     elif data_cliente['protocol_msg'] == 'verPerfil':
 

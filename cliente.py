@@ -60,15 +60,13 @@ def entar(type, action):
         while True:
             protocol_msg = "login"
             while True:
-                cpf = input('CPF (digite somente números): ')
-                if len(cpf) == 11:
-                    if all(cpf.isdigit() for cpf in cpf):
-                        break
-                    else:
-                        print('O CPF é inválido')
-                else:
-                    print('O CPF deve conter 11 dígitos.')
-
+                try:
+                    cpf = input('CPF (digite somente números): ')
+                    assert all(cpf.isdigit() for cpf in cpf), 'Utilize somente dígitos.'
+                    assert len(cpf) == 11, 'O CPF deve conter 11 dígitos.'
+                    break
+                except AssertionError as ae:
+                    print(ae)
             # hasheando a senha para sha256
             hash_passwd = sha256(input("senha: ").encode('utf-8'))
             # convertendo a senha de bytes para hexadecimal
@@ -97,23 +95,22 @@ def entar(type, action):
     elif action == "criar":
         protocol_msg = "criar"  # -> definindo a flag do protocolo.
         while True:
-
             nome = input("Digite o nome: ")
             while True:
-                email = input("Digite o email: ")
-                if '@' in email:
+                try:
+                    email = input("Digite o email: ")
+                    assert '@' in email,'Email inválido.'
                     break
-                else:
-                    print('Email inválido.')
+                except AssertionError as ae:
+                        print(ae)
             while True:
-                cpf = input('CPF (digite somente números): ')
-                if len(cpf) == 11:
-                    if all(cpf.isdigit() for cpf in cpf):
-                        break
-                    else:
-                        print('O CPF é inválido.')
-                else:
-                    print('O CPF deve conter 11 dígitos.')
+                try:
+                    cpf = input('CPF (digite somente números): ')
+                    assert all(cpf.isdigit() for cpf in cpf), 'Utilize somente dígitos.'
+                    assert len(cpf) == 11, 'O CPF deve conter 11 dígitos.'
+                    break
+                except AssertionError as ae:
+                    print(ae)
 
             # hasheando a senha para sha256
             hash_passwd = sha256(input("Digite sua senha: ").encode('utf-8'))

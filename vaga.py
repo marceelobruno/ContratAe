@@ -35,22 +35,28 @@ class Vaga:
     def quantidade(self):
         return self.__quantidade
 
-    def adicionarCandidatura(self, candidato):
+    def adicionarCandidatura(self, candidato:dict)->None:
+        """
+        Adiciona um dicionário contendo as informações do candidato
+        na self.__lista_candidaturas. E diminui a quantidade de vagas
+        disponíveis em 1.
+
+        Args:
+            candidato (dict): candidato a ser adicionado. 
+        """
         self.__lista_candidaturas.append(candidato)
         self.__quantidade -= 1
 
-    def removerCandidatura(self, elemento):
+    def removerCandidatura(self, elemento:dict)-> None:
+        """
+        Remove o conteúdo do candidato da self.__lista_candidaturas.
+        Aumenta a quantidade de vagas em 1.
+
+        Args:
+            elemento (dict): candidato a ser removido.
+        """
         self.__lista_candidaturas.remove(elemento)
         self.__quantidade += 1
-
-    # def gerarID(self):
-    #     self.__id = random.randint(1, 9999)
-
-    # def aumentar_quantidade(self):
-    #     self.__quantidade += 1
-
-    # def mostrarCandidaturas(self):
-    #     return self.__lista_candidaturas
 
     def vagaEstaCheia(self):
         """
@@ -123,18 +129,3 @@ class Vaga:
 """
 
 
-if __name__ == '__main__':
-    v = Vaga('tsi', 'ti', 'adf', 10, 'hsdfiuwshgf', 'fhwiufhw', 'hhdsgf')
-    # c = Candidato('luiz','lf','1234')
-    # d = Candidato('lucas','lf','1234')
-    # e = Candidato('marcelo','lf','1234')
-    # f = Candidato('bruno','lf','1234')
-    # v.adicionarCandidatura(c)
-    # v.adicionarCandidatura(d)
-    # v.adicionarCandidatura(e)
-    # v.adicionarCandidatura(f)
-    # print(v.mostrarCandidaturas())
-    print(v)
-    v.gerarID()
-    print(v)
-    print(v)

@@ -210,13 +210,3 @@ class Candidato:
         Cidade: {self.__cidade}
         UF: {self.__uf}
 """
-if __name__ == "__main__":
-    c = Candidato('luiz','lf',1234,100)
-    # c.vagas_aplicadas.append('casa')
-    # c.vagas_aplicadas.append('predio')
-    # c.vagas_aplicadas.append('ifpb')
-    # print(c.ver_candidaturas())
-    # c.cancelar_candidatura('predio')
-    # print(c.ver_candidaturas())
-    c.criar_perfil(['bahia','city','flamengo'])
-    print(c)
