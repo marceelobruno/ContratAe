@@ -13,17 +13,18 @@ Ao interagir com o protocolo do nosso projeto, você pode encontrar as seguintes
 - **200 OK**: Indica que a solicitação foi bem-sucedida. A resposta incluirá os detalhes necessários.
 
 - **201 Created**: Indica que a solicitação foi bem-sucedida e resultou na criação de um novo recurso.
+  
+- **203 Complete**: Indica que o perfil do candidato está completo.
 
 - **400 Bad Request**: Indica que a solicitação do cliente foi inválida ou malformada. O servidor não pode ou não processará a solicitação.
 
-- **401 Unauthorized**: Indica que a solicitação não foi autorizada. 
+- **401 Unauthorized**: Indica que a autenticação não foi autorizada. 
 
-- **403 Incomplete**: Indica que a solicitação não pode ser processada porque está incompleta. 
+- **403 Incomplete**: Indica que o perfil do candidato está incompleto. 
 
 - **404 Not Found**: Indica que o recurso solicitado não foi encontrado no servidor.
 
 Esses códigos de mensagem são usados para fornecer informações sobre o estado das solicitações e respostas no contexto do protocolo SPC.
-
 
 # Mensagens de Protocolo e Seus Parâmetros
 
@@ -159,7 +160,7 @@ Formato esperado
 }
 ```
 ## Ver Vagas
-formato esperado
+Formato esperado
 ```json
 {
     "protocol_msg": "verVagas",
