@@ -47,7 +47,6 @@ def get_candidatos_from_supabase() -> None:
             list_candidate["uf"],
         )
 
-    # print(TableCandidatos)
     return logger.info('Candidatos inseridos na HashTable')
 
 
@@ -66,7 +65,6 @@ def get_recrutadores_from_supabase() -> None:
             list_recruiter["cpf"],
             list_recruiter["empresa"],
         )
-    # print(TableRecrutadores)
     return logger.info('Recrutadores inseridos na HashTable')
 
 
@@ -88,7 +86,6 @@ def get_vagas_from_supabase() -> list:
             vaga_info["salario_vaga"], vaga_info["requisitos"])
         ListaVagas.append(vagaTemporaria)
 
-    # print(ListaVagas)
     return logger.info("Vagas inseridas na Lista de Vagas")
 
 def handle_client(cliente, addr=None):
@@ -132,7 +129,6 @@ def procurar_vaga(lista, idVaga):
             if vaga.id == idVaga:
                 return vaga
         return None
-
 
 def protocol(cliente, data_cliente, addr):
 
@@ -227,7 +223,6 @@ def protocol(cliente, data_cliente, addr):
                     cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     return handle_client(cliente, addr)
                 
-
     # -----------VER PERFIL-------------
     elif data_cliente['protocol_msg'] == 'verPerfil':
 
@@ -250,8 +245,6 @@ def protocol(cliente, data_cliente, addr):
     elif data_cliente['protocol_msg'] == 'criar':
 
         logger.info(f'Cliente {data_cliente["cpf"]} requisitou {data_cliente["protocol_msg"]}')
-
-        print("entrei", data_cliente['protocol_msg'])
 
         if data_cliente["type"] == "c":
             if data_cliente["cpf"] not in TableCandidatos:
@@ -421,7 +414,6 @@ def protocol(cliente, data_cliente, addr):
             if info_vaga:                
                 cand.cancelar_candidatura(info_vaga)
                 info_vaga2 = procurar_vaga(ListaVagas, idVaga)
-                print(info_vaga2)
                 info_vaga2.removerCandidatura(cand.dict_user())
 
                 protocol_response = {'status': "200 OK", 'message': 'Cancelamento efetuado com sucesso!'}
@@ -438,15 +430,18 @@ def protocol(cliente, data_cliente, addr):
                 return handle_client(cliente, addr)
 
     # --------------------- VERIFICAR -------------------------
-    elif data_cliente['protocol_msg'] == "verificar":
+    elif data_cliente['protocol_msg'] == "recuperarVaga":
             
-        cand = buscar_usuario(data_cliente["cpf"], "c")
+        rec = buscar_usuario(data_cliente["cpf"], "r")
         
-        if cand:
-            if cand.perfil_completo():
-                data_send = {'status':'200 OK', 'message':'Seu perfil está completo.'}
+        if rec:
+            for vaga in ListaVagas:
+                if vaga.cpf_recrutador == rec.cpf:
+                    data_send = {'status':'200 OK', 'data': vaga.id}
+                    cliente.send(json.dumps(data_send).encode('utf-8'))
+                    return handle_client(cliente, addr)
             else:
-                data_send = {'status':'406 Incomplete', 'message':'Seu perfil está incompleto.'}
+                data_send = {'status':'404 Not Found', 'message':'Não há vaga registrada para esse CPF.'}
                 
             cliente.send(json.dumps(data_send).encode('utf-8'))
             return handle_client(cliente, addr)
@@ -472,7 +467,6 @@ def protocol(cliente, data_cliente, addr):
                 data_cliente["cpf"], data_cliente['skills'], data_cliente['area'],
                 data_cliente['descricao'], data_cliente['cidade'], data_cliente['uf'])
 
-            print(cand)
             protocol_response = {'status': "201 Criado", 'message': 'Seu perfil está completo.'}
             cliente.send(json.dumps(protocol_response).encode('utf-8'))
             return handle_client(cliente, addr)
@@ -490,7 +484,4 @@ def run_server():
         t1.start()
 
 # Retornando os dados da tabela candidato para a hashtable-candidato
-# print(TableCandidatos)
 run_server()
-
-# print(TableRecrutadores)

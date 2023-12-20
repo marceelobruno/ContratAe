@@ -1,16 +1,15 @@
-# from users import Candidato
-# from DataStructures.ListaSequencialNumPY import Lista
 class Vaga:
-    def __init__(self, nome, idVaga, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
+    def __init__(self, nome, cpf_recrutador, idVaga, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
         self.__nome = nome
         self.__id = idVaga
+        self.__cpf_recrutador = cpf_recrutador
         self.__area = area
         self.__descricao = descricao
         self.__quantidade = quantidade
         self.__nome_empresa = nome_empresa
         self.__salario = salario
         self.__requisitos = requisitos
-        self.__lista_candidaturas = []  # lista do professor vulgo Alex
+        self.__lista_candidaturas = [] 
 
     @property
     def nome(self):
@@ -19,9 +18,14 @@ class Vaga:
     @property
     def id(self):
         return self.__id
+    
     @id.setter
     def id(self, value):
         self.__id = value
+    
+    @property
+    def cpf_recrutador(self):
+        return self.__cpf_recrutador
     
     @property
     def lista_candidaturas(self):

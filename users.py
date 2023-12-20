@@ -1,6 +1,5 @@
 from vaga import Vaga
 
-
 class Recrutador:
     def __init__(self, nome: str, email: str, senha: str, cpf: str, nome_empresa = None):
         self.__nome = nome
@@ -76,8 +75,6 @@ class Recrutador:
         Empresa: {self.__nome_empresa}
         Senha: {self.__senha}
 """
-
-
 class Candidato:
     def __init__(
         self,
@@ -213,8 +210,6 @@ class Candidato:
         Cidade: {self.__cidade}
         UF: {self.__uf}
 """
-
-
 if __name__ == "__main__":
     c = Candidato('luiz','lf',1234,100)
     # c.vagas_aplicadas.append('casa')

@@ -3,4 +3,3 @@ test_*.py
 teste_*.py
 database_*.py
 database.py
-.env
