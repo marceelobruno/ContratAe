@@ -153,10 +153,7 @@ class ChainingHashTable:
         return lista
 
     def __getitem__(self, key):
-        if self.__contains__(key):
-            return self.get(key)
-        else:
-            return None
+        return self.get(key)
     
     def __setitem__(self, key, data):
         self.put(key, data)

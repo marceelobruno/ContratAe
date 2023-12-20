@@ -36,9 +36,8 @@ class Vaga:
         self.__lista_candidaturas.append(candidato)
         self.__quantidade -= 1
 
-    # def removerCandidatura(self, key):
-    #     self.__lista_candidaturas.pop(key)
-    #     self.__quantidade += 1
+    def removerCandidatura(self, elemento):
+        self.__lista_candidaturas.remove(elemento)
 
     # def gerarID(self):
     #     self.__id = random.randint(1, 9999)

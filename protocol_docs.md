@@ -198,6 +198,7 @@ Formato esperado
 ```json
 {
     "protocol_msg": "criar_vaga",
+    "cpf": "cpf",
     "vaga_info": {
         "nome_vaga": "Desenvolvedor Python",
         "area_vaga": "Back End",
