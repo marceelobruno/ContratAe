@@ -6,6 +6,26 @@ O **Securitas Protocol ContratAe (SPC)** é um conjunto de mensagens e ações d
 ### Conhecendo o Servidor - (SPC)
 O servidor ContratAe utiliza o **SPC** para comunicação, adotando o formato JSON para a troca de dados. Os status codes também são retornados em JSON. Algumas ações suportadas incluem: login, criar, verCandidaturas, verVagas, verPerfil, criarVaga, candidatar, cancelarCandidatura, verificar, e completarPerfil.
 
+# Mensagens do Protocolo
+
+Ao interagir com o protocolo do nosso projeto, você pode encontrar as seguintes mensagens:
+
+- **200 OK**: Indica que a solicitação foi bem-sucedida. A resposta incluirá os detalhes necessários.
+
+- **201 Created**: Indica que a solicitação foi bem-sucedida e resultou na criação de um novo recurso.
+  
+- **203 Complete**: Indica que o perfil do candidato está completo.
+
+- **400 Bad Request**: Indica que a solicitação do cliente foi inválida ou malformada. O servidor não pode ou não processará a solicitação.
+
+- **401 Unauthorized**: Indica que a autenticação não foi autorizada. 
+
+- **403 Incomplete**: Indica que o perfil do candidato está incompleto. 
+
+- **404 Not Found**: Indica que o recurso solicitado não foi encontrado no servidor.
+
+Esses códigos de mensagem são usados para fornecer informações sobre o estado das solicitações e respostas no contexto do protocolo SPC.
+
 # Mensagens de Protocolo e Seus Parâmetros
 
 ## Login
@@ -114,7 +134,7 @@ Formato Esperado:
 
 {
     "status": "404 Not Found",
-    "message": "Sua vaga não possui candidaturas."
+    "message": "A vaga não possui candidaturas"
 }
 ````
 ## Ver Perfil
@@ -140,7 +160,7 @@ Formato esperado
 }
 ```
 ## Ver Vagas
-formato esperado
+Formato esperado
 ```json
 {
     "protocol_msg": "verVagas",
@@ -242,26 +262,26 @@ formato esperado
     "message": "Vaga não encontrada."
 }
 ```
-## Verificar Perfil Completo
+## Recuperar Vaga Recrutador
 Formato esperado
 ```json
 {
-    "protocol_msg": "verificar",
+    "protocol_msg": "recuperarVaga",
     "cpf": "cpf"
 }
 ```
 #### Respostas do Servidor:
 ```json
 {
-    "status": "203 Complete",
+    "status": "200 OK",
     "message": "Seu perfil está completo."
 }
 ```
 #### Menssagens de Erro:
 ```json
 {
-    "status": "403 Incomplete",
-    "message": "Seu perfil está incompleto."
+    "status": "404 Not Found",
+    "message": "Não há vaga registrada para esse CPF."
 }
 ```
 ## Completar Perfil
