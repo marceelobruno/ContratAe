@@ -64,7 +64,7 @@ Certifique-se de instalar as seguintes dependências antes de executar o projeto
 - [python-dotenv](https://github.com/theskumar/python-dotenv): Carrega variáveis de ambiente a partir de um arquivo chamado `.env`.
 - [NumPy](https://numpy.org/): Biblioteca para suporte a arrays e matrizes multidimensionais, junto com funções matemáticas de alto nível para operar nesses elementos.
 
-## Instalação das Dependências
+## Instalação das Dependências:
 
 Use o seguinte comando para instalar as dependências:
 
@@ -86,7 +86,7 @@ Em seguida, inicie o cliente, passando o IP do servidor como argumento:
 python cliente.py [ip_do_servidor]
 ```
 
-## Desenvolvedores
+## Desenvolvedores:
 
 Este projeto foi desenvolvido por:
 
@@ -99,11 +99,11 @@ Este projeto foi desenvolvido por:
 - Bruno Marcelo: [GitHub](https://github.com/marceelobruno)<br>
   email: [bruno.marcelo@academico.ifpb.edu.br](mailto:bruno.marcelo@academico.ifpb.edu.br) 
 
-## Contribuição
+## Contribuição:
 
 Este é um projeto acadêmico e não requer contribuições no momento.
 
-## Licença
+## Licença:
 
 Este projeto está licenciado sob a [MIT License](LICENSE).
 
