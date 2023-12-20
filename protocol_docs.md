@@ -134,7 +134,7 @@ Formato Esperado:
 
 {
     "status": "404 Not Found",
-    "message": "A vaga não possui candidaturas ou não foi encontrada."
+    "message": "A vaga não possui candidaturas"
 }
 ````
 ## Ver Perfil
