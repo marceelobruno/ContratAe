@@ -134,7 +134,7 @@ Formato Esperado:
 
 {
     "status": "404 Not Found",
-    "message": "Sua vaga não possui candidaturas."
+    "message": "A vaga não possui candidaturas ou não foi encontrada."
 }
 ````
 ## Ver Perfil
@@ -262,26 +262,26 @@ formato esperado
     "message": "Vaga não encontrada."
 }
 ```
-## Verificar Perfil Completo
+## Recuperar Vaga Recrutador
 Formato esperado
 ```json
 {
-    "protocol_msg": "verificar",
+    "protocol_msg": "recuperarVaga",
     "cpf": "cpf"
 }
 ```
 #### Respostas do Servidor:
 ```json
 {
-    "status": "203 Complete",
+    "status": "200 OK",
     "message": "Seu perfil está completo."
 }
 ```
 #### Menssagens de Erro:
 ```json
 {
-    "status": "403 Incomplete",
-    "message": "Seu perfil está incompleto."
+    "status": "404 Not Found",
+    "message": "Não há vaga registrada para esse CPF."
 }
 ```
 ## Completar Perfil
