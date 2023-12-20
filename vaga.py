@@ -104,12 +104,12 @@ class Vaga:
         vaga_dict = {
             "nome": self.__nome,
             "area": self.__area,
-            "id": self.__id,
+            "id_vaga": self.__id,
             "descricao": self.__descricao,
             "quantidade": self.__quantidade,
             "nome_empresa": self.__nome_empresa,
             "salario": self.__salario,
-            "requisitos": self.__requisitos,
+            "requisito": self.__requisitos,
         }
         return vaga_dict
 

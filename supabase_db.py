@@ -281,6 +281,18 @@ class VagaDB():
         # Retorna todos os registros da tabela vaga em um dict
         return data[1]
 
+    def get_all_candidatos_vaga(self, id_vaga: int) -> list[dict]:
+        """Retorna todos os candidatos de determinada Vaga da tabela Candidaturas"""
+        data, count = (
+            supabase_conn(url, key)
+            .table("candidaturas")
+            .select("id_candidato, candidato(*)")
+            .eq("id_vaga", f"{id_vaga}")
+            .execute()
+        )
+        logger.info(f"Retornando todos candidatos da vaga: {id_vaga}")
+        return data[1]
+
 
 if __name__ == "__main__":
 
@@ -304,8 +316,10 @@ if __name__ == "__main__":
     # candidato.insert_candidato("22244466688", "Bino", "bino@gmail.com", senha, cidade='Santos', uf='SP')
     # candidato.delete_candidato('22244466688')
     # print(candidato.get_candidato_passwrd("22244466688"))
-    pprint(candidato.get_all_candidatos())
+    # pprint(candidato.get_all_candidatos())
     # candidato.delete_candidatura('44455566677', 97736)
+    # pprint(candidato.get_candidaturas('44455566677'))
+
 
     # VALIDANDO MÉTODOS PARA CLASSE RECRUTADOR
     # recrutador.insert_recrutador('77755533311', 'Zé', 'Youtube', 'defante@yt.com','976fd3649d3175915cf4cfd327bca59ae742de6cc13bb0cf0d70105e52c15762')
@@ -329,3 +343,4 @@ if __name__ == "__main__":
     # print('VAGAS:\n', vaga.get_all_vagas())
     # print(vaga.get_vagas_recrutador('99966633311'))
     # candidato.completar_perfil_candidato('44455566677', 'SQL, Python, PowerBI', 'Dados', 'Sou Marcelo', 'Cabedelo', 'PB')
+    # print(vaga.get_all_candidatos_vaga(70895))

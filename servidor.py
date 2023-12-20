@@ -2,9 +2,9 @@
 Servidor - Protocolo SPC (Securitas Protocol ContratAe)
 """
 import json
+import random
 import socket
 import threading
-import random
 
 from DataStructures.ChainingHashTable import ChainingHashTable
 from DataStructures.ListaSequencialNumPY import Lista
@@ -69,30 +69,41 @@ def get_recrutadores_from_supabase() -> None:
 
 
 def get_vagas_from_supabase() -> list:
-    """ Retornando os dados da tabela Vaga para a Lista de Vagas """
+    """Retornando os dados da tabela Vaga para a Lista de Vagas"""
     vaga = VagaDB()
     vaga_data = vaga.get_all_vagas()
+    # vaga_data = lista_vagas
 
     for i, vaga in enumerate(vaga_data):
-        user_recrutador = buscar_usuario[data_cliente["cpf"], "r"]
-        vaga_info = data_cliente['vaga_info']
+        cpf_rec = vaga["id_recrutador"]
+        user_recrutador = buscar_usuario(cpf_rec, "r")  # CPF do Rec
+        del vaga['id_recrutador']
 
-        vagaTemporaria = user_recrutador.criar_vaga(
-            vaga_info["nome_vaga"],
-            vaga_info["area_vaga"],
-            vaga_info["descricao_vaga"],
-            vaga_info["quant_candidaturas"],
+        vaga_info = vaga  # Informações da Vaga
+
+        vaga_temporaria = user_recrutador.criar_vaga(
+            vaga_info["nome"],
+            vaga_info["id_vaga"],
+            vaga_info["area"],
+            vaga_info["descricao"],
+            vaga_info["quantidade"],
             user_recrutador.empresa,
-            vaga_info["salario_vaga"], vaga_info["requisitos"])
-        ListaVagas.append(vagaTemporaria)
+            vaga_info["salario"], vaga_info["requisito"])
+        ListaVagas.append(vaga_temporaria)
 
     return logger.info("Vagas inseridas na Lista de Vagas")
 
+def add_candidaturas_candidatos():
+    cand_por_vaga = VagaDB().get_all_candidatos_vaga()
+    
+
+
+
 def handle_client(cliente, addr=None):
     try:
-        data_recv = cliente.recv(1024)
+        data_recv = cliente.recv(4096)
         data_recv_decoded = json.loads(data_recv.decode('utf-8'))
-        data_cliente =  data_recv_decoded
+        data_cliente = data_recv_decoded
         protocol(cliente, data_cliente, addr)
     except json.decoder.JSONDecodeError:
         print(clientes[addr], ' desconectou.')
@@ -106,7 +117,7 @@ def buscar_usuario(cpf, type):
         table = TableCandidatos
     else:
         table = TableRecrutadores
-    try: 
+    try:
         user_recrutador = table[cpf]  # -> recuperando a referencia do objeto Recrutador
         if user_recrutador:
             return user_recrutador  # -> enviando a referencia do objeto para o cliente
@@ -124,7 +135,7 @@ def formatar_lista(lista):
 def procurar_vaga(lista, idVaga):
     try:
         for vaga in lista:
-            if vaga['id'] == idVaga:
+            if vaga['id_vaga'] == idVaga:
                 return vaga
         return None
     except:
@@ -196,8 +207,15 @@ def protocol(cliente, data_cliente, addr):
 
         logger.info(f'Cliente {data_cliente["cpf"]} requisitou {data_cliente["protocol_msg"]}')
 
+        # Usa o método que retorna todas as candidaturas do Candidato da tabela Candidaturas
+        busca_cand = CandidatoDB().get_candidaturas(data_cliente["cpf"])
+
         if data_cliente['type'] == 'c':
             candidato = buscar_usuario(data_cliente["cpf"], "c")
+
+            for i in range(len(busca_cand)):
+                candidato.vagas_aplicadas.append(busca_cand[i]['vaga'])
+
             if candidato:
                 vagas = candidato.vagas_aplicadas
 
@@ -205,8 +223,8 @@ def protocol(cliente, data_cliente, addr):
                     protocol_response = {"status":"404 Not Found", "message":"Você não se candidatou a nenhuma vaga."}
                     cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     return handle_client(cliente, addr)
-                else: 
-                    protocol_response = {"status":"200 OK", "data": vagas }
+                else:
+                    protocol_response = {"status": "200 OK", "data": vagas}
                     cliente.send(json.dumps(protocol_response).encode('utf-8'))
                     return handle_client(cliente, addr)
             else:
@@ -250,7 +268,7 @@ def protocol(cliente, data_cliente, addr):
             cliente.send(json.dumps(protocol_response).encode('utf-8'))
             return handle_client(cliente, addr)
 
-    # -------------------------- CRIAR -----------------------------
+    # -------------------------- CRIAR USUÁRIO -----------------------------
     elif data_cliente['protocol_msg'] == 'criar':
 
         logger.info(f'Cliente {data_cliente["cpf"]} requisitou {data_cliente["protocol_msg"]}')
@@ -320,7 +338,6 @@ def protocol(cliente, data_cliente, addr):
                 vaga_info["quant_candidaturas"],
                 user_recrutador.empresa,
                 vaga_info["salario_vaga"], vaga_info["requisitos"]))
-            
 
             logger.info(f'Vaga criada! - ID: {idVaga}')
 
@@ -352,17 +369,18 @@ def protocol(cliente, data_cliente, addr):
 
         idVaga = data_cliente['idVaga']
         cand = buscar_usuario(data_cliente["cpf"], "c")
-        
-        #Verifica se os dados recebidos são válidos
+
+        # Verifica se os dados recebidos são válidos
         if not cand:
             protocol_response = {"status": "400 Bad Request", "message": 'Dados inválidos'}
             cliente.send(json.dumps(protocol_response).encode('utf-8'))
             return handle_client(cliente, addr)
-        else:  
+        else:
             cand_dict = cand.dict_user()
+            logger.info(f'Cand Dict: {cand_dict}')
             cpf_cand = cand.cpf
 
-            #Verifica se há vagas criadas na ListaVagas
+            # Verifica se há vagas criadas na ListaVagas
             if len(ListaVagas) == 0:
                 protocol_response = {"status": "404 Not Found", "message": 'Não há vagas cadastradas...'}
                 cliente.send(json.dumps(protocol_response).encode('utf-8'))
@@ -384,7 +402,12 @@ def protocol(cliente, data_cliente, addr):
                             return handle_client(cliente, addr)
 
                         vaga.adicionarCandidatura(cand.dict_user())
+                        logger.info(f'{vaga.adicionarCandidatura(cand.dict_user())}')
+                        print()
+                        logger.info(f'Cand Dict User: {cand.dict_user()}')
                         cand.candidatar(vaga.dict_vagaMOD())
+                        logger.info(f'Cand Candidatar: {cand.candidatar(vaga.dict_vagaMOD())}')
+                        
 
                         # Cadastra em uma vaga determinado candidato na tabela Candidaturas
                         CandidatoDB().candidatar_se(cpf_cand, idVaga)
@@ -402,10 +425,9 @@ def protocol(cliente, data_cliente, addr):
 
     # ---------------------- CANCELAR CANDIDATURA --------------------------
     elif data_cliente['protocol_msg'] == "cancelarCandidatura":
-       
+
         # mutex.acquire()
         logger.info(f'Cliente {data_cliente["cpf"]} requisitou {data_cliente["protocol_msg"]}')
-
 
         cand = buscar_usuario(data_cliente["cpf"], "c")
     
@@ -419,8 +441,9 @@ def protocol(cliente, data_cliente, addr):
             idVaga = data_cliente['idVaga']
             lista_candi = cand.vagas_aplicadas
 
+
             info_vaga = procurar_vaga(lista_candi, idVaga)
-            if info_vaga:                
+            if info_vaga:
                 cand.cancelar_candidatura(info_vaga)
                 info_vaga2 = procurar_vaga(ListaVagas, idVaga)
                 info_vaga2.removerCandidatura(cand.dict_user())
@@ -479,11 +502,15 @@ def protocol(cliente, data_cliente, addr):
             protocol_response = {'status': "201 Criado", 'message': 'Seu perfil está completo.'}
             cliente.send(json.dumps(protocol_response).encode('utf-8'))
             return handle_client(cliente, addr)
-            
+
+
 def run_server():
+    """_summary_
+    """
     get_candidatos_from_supabase()
     get_recrutadores_from_supabase()
-    # get_vagas_from_supabase()
+    get_vagas_from_supabase()
+    print('\n\n', ListaVagas)
 
     while True:
         cliente, addr = server.accept()

@@ -117,7 +117,7 @@ class Candidato:
         return self.__cpf
 
 
-    def candidatar(self, vaga:dict)-> None:#<-----em análise
+    def candidatar(self, vaga:dict) -> None:#<-----em análise
         """
         Método qua adiciona uma vaga (em formato de dicionário)
         na lista de vagas aplicadas do candidato.

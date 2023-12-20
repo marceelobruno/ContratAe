@@ -242,7 +242,7 @@ def dashboard(cpf, type, action):
             content_dash['type'] = type
             cliente_socket.send(json.dumps(content_dash).encode('utf-8'))
 
-            response_server = cliente_socket.recv(1024)
+            response_server = cliente_socket.recv(4096)
             response_server = json.loads(response_server.decode('utf-8'))
 
             if protocol_msg == 'verVagas':
@@ -338,12 +338,13 @@ def dashboard(cpf, type, action):
 
             cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
 
-            response_server = cliente_socket.recv(1024)
+            response_server = cliente_socket.recv(4096)
             response_server = json.loads(response_server.decode('utf-8'))
 
             logger.info(response_server["message"])
             idVaga = response_server['data']
-        else: 
+
+        else:
             protocol_msg = "recuperarVaga"
             data_cliente= {"protocol_msg": protocol_msg, "cpf": cpf}
             cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
@@ -352,7 +353,7 @@ def dashboard(cpf, type, action):
             idVaga = 0
             if response_server["status"] == "200 Ok":
                 idVaga = response_server['data']
-            
+
         content_dash = {}
         protocol_msg = 'verCandidaturas'
         content_dash['cpf'] = cpf
