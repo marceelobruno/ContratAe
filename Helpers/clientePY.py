@@ -98,7 +98,7 @@ def entar(type, action):
             #     print('Conexão com o servidor não foi estabelecida corretamente')
 
     elif action == "criar":
-        protocol_msg = "CRIAR"  # -> definindo a flag do protocolo.
+        protocol_msg = "criar"  # -> definindo a flag do protocolo.
         # cliente_socket.send(protocol_msg.encode('utf-8''utf-8'))
         # cliente_socket.send(json.dumps(protocol_msg))
         while True:
@@ -165,7 +165,7 @@ def dashboard(cpf, type):
 
     if type == "c":  # -> aqui ficará a área do candidato
         data_veri = {
-            'protocol_msg': 'VERIFICAR',
+            'protocol_msg': 'verificar',
             'cpf': cpf
         }
         cliente_socket.send(json.dumps(data_veri).encode('utf-8'))
@@ -313,7 +313,7 @@ def dashboard(cpf, type):
         print("Crie sua primeira vaga")
         print("----------------------")
 
-        protocol_msg = "criar_vaga"
+        protocol_msg = "criarVaga"
         dict_vaga = {}
         dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
         dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
@@ -349,7 +349,7 @@ def dashboard(cpf, type):
             dict_vaga["requisitos"] += "".join(resquisito_vaga + ',')
         dict_vaga["requisitos"] = dict_vaga["requisitos"][:-1]
 
-        data_cliente = {'protocol_msg': protocol_msg, 'type': 'r', 'cpf': cpf, 'vaga_info': dict_vaga}
+        data_cliente = {'protocol_msg': protocol_msg, 'cpf': cpf, 'vaga_info': dict_vaga}
 
         cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
 
