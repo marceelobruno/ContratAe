@@ -32,8 +32,17 @@
 # i = float(input('numero: '))
 # print(i)
 
-d = {"a": 1, "b": 2, "c": 3}
+# d = {"a": 1, "b": 2, "c": 3}
 
-d.pop("a")
+# d.pop("a")
 
-print(d)
+# print(d)
+
+# nome = input("Digite o nome: ")
+# while True:
+#     email = input("Digite o email: ")
+#     if '@' in email:
+#         print('boa')
+#     else:
+#         print('nao boa')
+

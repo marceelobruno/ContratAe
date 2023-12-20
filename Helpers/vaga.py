@@ -5,9 +5,9 @@ import random
 
 
 class Vaga:
-    def __init__(self, nome, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
+    def __init__(self, nome,idVaga, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
         self.__nome = nome
-        self.__id = random.randint(1, 99999)
+        self.__id = idVaga
         self.__area = area
         self.__descricao = descricao
         self.__quantidade = quantidade
@@ -23,7 +23,10 @@ class Vaga:
     @property
     def id(self):
         return self.__id
-
+    @id.setter
+    def id(self, value):
+        self.__id = value
+    
     @property
     def lista_candidaturas(self):
         return self.__lista_candidaturas
@@ -38,12 +41,13 @@ class Vaga:
 
     def removerCandidatura(self, elemento):
         self.__lista_candidaturas.remove(elemento)
+        self.__quantidade += 1
 
     # def gerarID(self):
     #     self.__id = random.randint(1, 9999)
 
-    def aumentar_quantidade(self):
-        self.__quantidade += 1
+    # def aumentar_quantidade(self):
+    #     self.__quantidade += 1
 
     # def mostrarCandidaturas(self):
     #     return self.__lista_candidaturas

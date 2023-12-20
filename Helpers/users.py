@@ -25,13 +25,14 @@ class Recrutador:
     def senha(self):
         return self.__senha
     
-    def criar_vaga(self, nome:str, area:str, descricao:str, quantidade:int, empresa:str, salario:float, requisitos:list):
+    def criar_vaga(self, nome:str, idVaga, area:str, descricao:str, quantidade:int, empresa:str, salario:float, requisitos:list):
         """
         Método responsável por criar um objeto Vaga no servidor.
         Recebe os parâmetros do objeto Vaga e retorna o próprio objeto. 
 
         Args:
             nome (str): nome da vaga.
+            idVaga (int): id da vaga.
             area (str): area da vaga.
             descricao (str): descrição da vaga.
             quantidade (int): quantidade de candidaturas aceitas na vaga.
@@ -43,7 +44,7 @@ class Recrutador:
             Vaga: Retorna o objeto Vaga. 
         """
         return Vaga(
-            nome, area, descricao, quantidade, empresa, salario, requisitos
+            nome,idVaga, area, descricao, quantidade, empresa, salario, requisitos
         )
 
     def dict_user(self):
