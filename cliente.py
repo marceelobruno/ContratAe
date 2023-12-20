@@ -6,20 +6,17 @@ from hashlib import sha256
 from loguru import logger
 
 if len(sys.argv) != 2:
-    print('Por favor informe o endereço ip do servidor.')
-    sys.exit(1)
-
-END_IP = sys.argv[1]
+    END_IP = input('Por favor informe o endereço ip do servidor: ')
+else:
+    END_IP = sys.argv[1]
 
 PORT = 5000
-
 servidor = (END_IP, PORT)
-
 cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     cliente_socket.connect(servidor)
-except ConnectionRefusedError:
+except:
     print('\nNão foi possível estabelecer conexão com o servidor.\n')
     sys.exit(1)
 
@@ -425,6 +422,5 @@ def dashboard(cpf, type):
                 print("\nMuito obrigado por usar o ContratAe!\n")
                 cliente_socket.close()
                 sys.exit(1)
-
 
 run_cliente()

@@ -44,7 +44,7 @@ class Recrutador:
             Vaga: Retorna o objeto Vaga. 
         """
         return Vaga(
-            nome,idVaga, area, descricao, quantidade, empresa, salario, requisitos
+            nome, self.__cpf, idVaga, area, descricao, quantidade, empresa, salario, requisitos
         )
 
     def dict_user(self):

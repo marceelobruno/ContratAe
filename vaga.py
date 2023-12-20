@@ -1,11 +1,7 @@
 # from users import Candidato
-import random
-
 # from DataStructures.ListaSequencialNumPY import Lista
-
-
 class Vaga:
-    def __init__(self, nome,idVaga, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
+    def __init__(self, nome, idVaga, area, descricao, quantidade: int, nome_empresa, salario: float, requisitos):
         self.__nome = nome
         self.__id = idVaga
         self.__area = area

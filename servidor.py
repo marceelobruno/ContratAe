@@ -92,14 +92,13 @@ def get_vagas_from_supabase() -> list:
     return logger.info("Vagas inseridas na Lista de Vagas")
 
 def handle_client(cliente, addr=None):
-    # try:
+    try:
         data_recv = cliente.recv(1024)
         data_recv_decoded = json.loads(data_recv.decode('utf-8'))
         data_cliente =  data_recv_decoded
         protocol(cliente, data_cliente, addr)
-
-    # except:
-    #     print(clientes[addr], ' desconectou.')
+    except:
+        print(clientes[addr], ' desconectou.')
 
 
 def buscar_usuario(cpf, type):
