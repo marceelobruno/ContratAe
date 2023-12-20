@@ -1,4 +1,5 @@
-![Group 16](https://github.com/LucasKaiquee/ContratAe/assets/85175643/d501899f-b2b9-49ce-a1c0-37a61d389e7f)
+![Group 17](https://github.com/LucasKaiquee/ContratAe/assets/85175643/ae517df4-87d4-4b9a-8e98-3a653266aef4)
+
 ### Bem-vindo(a) ao ContratAe, uma aplicação na arquitetura cliente-servidor dedicada a facilitar a integração entre estudantes em busca de estágio e oportunidades disponíveis. Nosso objetivo é aprimorar a comunicação entre estudantes e empresas, visando superar desafios frequentes relacionados à interação entre faculdades e o setor corporativo.
 
 Neste projeto, utilizamos as seguintes tecnologias:
