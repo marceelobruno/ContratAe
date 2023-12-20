@@ -2,27 +2,23 @@ import json
 import socket
 import sys
 from hashlib import sha256
-
+from utils import mostrarVagas
 from loguru import logger
 
 if len(sys.argv) != 2:
-    print('Por favor informe o endereço ip do servidor.')
-    sys.exit(1)
-
-END_IP = sys.argv[1]
+    END_IP = input('Por favor informe o endereço ip do servidor: ')
+else:
+    END_IP = sys.argv[1]
 
 PORT = 5000
-
 servidor = (END_IP, PORT)
-
 cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     cliente_socket.connect(servidor)
-except ConnectionRefusedError:
+except:
     print('\nNão foi possível estabelecer conexão com o servidor.\n')
     sys.exit(1)
-
 
 def run_cliente():
     print("=== ContratAe ===")
@@ -95,7 +91,7 @@ def entar(type, action):
                 print(response_server["message"])
 
             else:
-                dashboard(response_server['data'],type)
+                dashboard(response_server['data'],type, action)
                 break
 
     elif action == "criar":
@@ -148,41 +144,13 @@ def entar(type, action):
                 print(response_server["message"])
                 
             else:
-                dashboard(response_server['data'], type)  # -> chamando a função principal do cliente
+                dashboard(response_server['data'], type, action)  # -> chamando a função principal do cliente
                 break
 
-def mostrarVagas(vaga):
-    print(f"""
-    -------------------------
+def dashboard(cpf, type, action):
 
-    Nome: {vaga["nome"]}
-    ID: {vaga['id']}
-    Area: {vaga["area"]}
-    Descricao: {vaga["descricao"]}
-    Quantidade de vagas: {vaga['quantidade']}
-    Empresa: {vaga['nome_empresa']}
-    Salario: {vaga['salario']}
-    Requisitos: {vaga['requisitos']}
-
-    -------------------------
-
-""")
-
-def dashboard(cpf, type):
-
-    if type == "c":  # -> aqui ficará a área do candidato
-        data_veri = {
-            'protocol_msg': 'verificar',
-            'cpf': cpf
-        }
-        cliente_socket.send(json.dumps(data_veri).encode('utf-8'))
-
-        response_server = cliente_socket.recv(1024)
-        response_server = json.loads(response_server.decode('utf-8'))
-
-        if response_server['status'] == '406 Incomplete':
-            print(response_server['message'])
-
+    if type == "c":
+        if action == "criar":
             area = input('Área: ')
             habilidades = ''
             while True:
@@ -318,73 +286,83 @@ def dashboard(cpf, type):
 """)
 
     elif type == 'r':
-        print()
-        print('Bem-vindo ao ContratAe!')
-        print("----------------------")
-        print("Crie sua primeira vaga")
-        print("----------------------")
+        if action == "criar":
+            print()
+            print('Bem-vindo ao ContratAe!')
+            print("----------------------")
+            print("Crie sua vaga")
+            print("----------------------")
 
-        protocol_msg = "criarVaga"
-        dict_vaga = {}
-        dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
-        dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
-        
-        while True:
-            try:
-                dict_vaga['descricao_vaga'] = input('Descrição (até 140 caracteres): ')
-                assert len(dict_vaga['descricao_vaga']) <= 140, 'Por favor, faça uma descrição com até 140 caracteres.'
-                break 
-            except AssertionError as ae:
-                print(ae)
+            protocol_msg = "criarVaga"
+            dict_vaga = {}
+            dict_vaga["nome_vaga"] = input("Digite o nome da vaga: ")
+            dict_vaga["area_vaga"] = input("Digite a área de atuação: ")
+            
+            while True:
+                try:
+                    dict_vaga['descricao_vaga'] = input('Descrição (até 140 caracteres): ')
+                    assert len(dict_vaga['descricao_vaga']) <= 140, 'Por favor, faça uma descrição com até 140 caracteres.'
+                    break 
+                except AssertionError as ae:
+                    print(ae)
 
-        while True:
-            try:
-                dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
-                if dict_vaga["quant_candidaturas"] <= 0:
-                    raise ValueError('Digite um número válido maior que 0.')
-                break
-            except ValueError:
-                print('Digite um número válido maior que 0.')
+            while True:
+                try:
+                    dict_vaga["quant_candidaturas"] = int(input("Aceita quantas candidaturas? "))
+                    if dict_vaga["quant_candidaturas"] <= 0:
+                        raise ValueError('Digite um número válido maior que 0.')
+                    break
+                except ValueError:
+                    print('Digite um número válido maior que 0.')
 
-        while True:
-            try:
-                dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
-                assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
-                break
-            except AssertionError as ae:
-                print(ae)
-            except ValueError:
-                print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
+            while True:
+                try:
+                    dict_vaga["salario_vaga"] = float(input("Digite o salário: "))
+                    assert dict_vaga['salario_vaga'] > 0, "Digite uma quantia maior que 0."
+                    break
+                except AssertionError as ae:
+                    print(ae)
+                except ValueError:
+                    print('Digite uma quantia utilizando números. (Para os decimais, utilize ( . ) ao invés de ( , ) )')
 
-        dict_vaga["requisitos"] = ''
+            dict_vaga["requisitos"] = ''
 
-        while True:
-            resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar): ').strip()
-            if resquisito_vaga == '.':
-                break
-            elif len(resquisito_vaga) == 0:
-                print('Por favor, informe um requisito')
-                continue
-            dict_vaga["requisitos"] += "".join(resquisito_vaga + ',')
-        dict_vaga["requisitos"] = dict_vaga["requisitos"][:-1]
+            while True:
+                resquisito_vaga = input('Digite os requisitos da vaga, 1 por vez (Digite "." para encerrar): ').strip()
+                if resquisito_vaga == '.':
+                    break
+                elif len(resquisito_vaga) == 0:
+                    print('Por favor, informe um requisito')
+                    continue
+                dict_vaga["requisitos"] += "".join(resquisito_vaga + ',')
+            dict_vaga["requisitos"] = dict_vaga["requisitos"][:-1]
 
-        data_cliente = {'protocol_msg': protocol_msg, 'cpf': cpf, 'vaga_info': dict_vaga}
+            data_cliente = {'protocol_msg': protocol_msg, 'cpf': cpf, 'vaga_info': dict_vaga}
 
-        cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
+            cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
 
-        response_server = cliente_socket.recv(1024)
-        response_server = json.loads(response_server.decode('utf-8'))
+            response_server = cliente_socket.recv(1024)
+            response_server = json.loads(response_server.decode('utf-8'))
 
-        logger.info(response_server["message"])
-        idVaga = response_server['data']
-
+            logger.info(response_server["message"])
+            idVaga = response_server['data']
+        else: 
+            protocol_msg = "recuperarVaga"
+            data_cliente= {"protocol_msg": protocol_msg, "cpf": cpf}
+            cliente_socket.send(json.dumps(data_cliente).encode('utf-8'))
+            response_server = cliente_socket.recv(1024)
+            response_server = json.loads(response_server.decode('utf-8'))
+            idVaga = 0
+            if response_server["status"] == "200 Ok":
+                idVaga = response_server['data']
+            
         content_dash = {}
         protocol_msg = 'verCandidaturas'
         content_dash['cpf'] = cpf
         content_dash['protocol_msg'] = protocol_msg
         content_dash['type'] = type
         content_dash['idVaga'] = idVaga
-
+            
         while True:
             while True:
                 try:
@@ -397,7 +375,6 @@ def dashboard(cpf, type):
                     print(ae)
 
             if entrada == '1':
-                print(content_dash['idVaga'])
                 cliente_socket.send(json.dumps(content_dash).encode('utf-8'))
 
                 new_response_server = cliente_socket.recv(1024)
@@ -425,6 +402,5 @@ def dashboard(cpf, type):
                 print("\nMuito obrigado por usar o ContratAe!\n")
                 cliente_socket.close()
                 sys.exit(1)
-
 
 run_cliente()
